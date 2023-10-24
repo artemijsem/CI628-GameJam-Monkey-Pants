@@ -87,9 +87,6 @@ void DrawCircle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_
             error += (tx - diameter);
         }
     }
-
-    player2.y = game_data.player2Y;
-
 }
 
 // Comment
