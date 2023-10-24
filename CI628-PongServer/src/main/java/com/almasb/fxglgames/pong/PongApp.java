@@ -33,6 +33,8 @@ import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.math.FXGLMath;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
+import com.almasb.fxgl.entity.level.Level;
+import com.almasb.fxgl.entity.level.text.TextLevelLoader;
 import com.almasb.fxgl.input.UserAction;
 import com.almasb.fxgl.net.*;
 import com.almasb.fxgl.physics.CollisionHandler;
@@ -76,6 +78,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     private BatComponent player1Bat;
     private BatComponent player2Bat;
 
+
     private Server<String> server;
 
     @Override
@@ -104,6 +107,28 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
             }
         }, KeyCode.S);
 
+        getInput().addAction(new UserAction("Left1") {
+            @Override
+            protected void onAction() {
+                player1Bat.left();
+            }
+
+            @Override
+            protected void onActionEnd() {
+                player1Bat.stop();
+            }
+        }, KeyCode.A);
+
+        getInput().addAction(new UserAction("Right1") {
+            @Override
+            protected void onAction() { player1Bat.right(); }
+
+            @Override
+            protected void onActionEnd() {
+                player1Bat.stop();
+            }
+        }, KeyCode.D);
+
         getInput().addAction(new UserAction("Up2") {
             @Override
             protected void onAction() {
@@ -127,7 +152,33 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
                 player2Bat.stop();
             }
         }, KeyCode.K);
+
+        getInput().addAction(new UserAction("Left2") {
+            @Override
+            protected void onAction() {
+                player2Bat.left();
+            }
+
+            @Override
+            protected void onActionEnd() {
+                player2Bat.stop();
+            }
+        }, KeyCode.J);
+
+        getInput().addAction(new UserAction("Right2") {
+            @Override
+            protected void onAction() {
+                player2Bat.right();
+            }
+
+            @Override
+            protected void onActionEnd() {
+                player2Bat.stop();
+            }
+        }, KeyCode.L);
     }
+
+
 
     @Override
     protected void initGameVars(Map<String, Object> vars) {
@@ -152,6 +203,9 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         });
 
         getGameWorld().addEntityFactory(new PongFactory());
+        getGameWorld().addEntityFactory(new LevelFactory());
+        Level level = getAssetLoader().loadLevel("level_01.txt", new TextLevelLoader(30, 30,'0'));
+        getGameWorld().setLevel(level);
         getGameScene().setBackgroundColor(Color.rgb(0, 0, 5));
 
         initScreenBounds();
@@ -200,8 +254,16 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
             }
         };
 
+        CollisionHandler batBatHandler = new CollisionHandler(EntityType.PLAYER_BAT, EntityType.ENEMY_BAT) {
+            @Override
+            protected void onCollisionBegin(Entity a, Entity b) {
+                server.broadcast(BAT1_HIT_BAT2);
+            }
+        };
+
         getPhysicsWorld().addCollisionHandler(ballBatHandler);
         getPhysicsWorld().addCollisionHandler(ballBatHandler.copyFor(EntityType.BALL, EntityType.ENEMY_BAT));
+        getPhysicsWorld().addCollisionHandler(ballBatHandler);
     }
 
     @Override
@@ -218,7 +280,8 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     @Override
     protected void onUpdate(double tpf) {
         if (!server.getConnections().isEmpty()) {
-            var message = "GAME_DATA," + player1.getY() + "," + player2.getY() + "," + ball.getX() + "," + ball.getY();
+            var message = "GAME_DATA," + player1.getY() + "," + player1.getX() + "," +
+                    player2.getY() + "," + player2.getX() + "," + ball.getX() + "," + ball.getY();
 
             server.broadcast(message);
         }
