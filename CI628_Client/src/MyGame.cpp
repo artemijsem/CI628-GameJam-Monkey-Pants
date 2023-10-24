@@ -1,6 +1,12 @@
 #include "MyGame.h"
 
 void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
+    if (cmd == "SETUP")
+    {
+        game_data.playerNum = stoi(args.at(0));
+        std::cout << "Player: " << game_data.playerNum << std::endl;
+    }
+
     if (cmd == "GAME_DATA") {
         // we should have exactly 6 arguments
         if (args.size() == 6) {
@@ -11,6 +17,7 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
             game_data.ballX = stoi(args.at(4));
             game_data.ballY = stoi(args.at(5));
         }
+
     } else {
         std::cout << "Received: " << cmd << std::endl;
     }
@@ -80,12 +87,16 @@ void DrawCircle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_
             error += (tx - diameter);
         }
     }
+
+    player2.y = game_data.player2Y;
+
 }
 
 // Comment
 void MyGame::render(SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &player1);
+
     SDL_RenderDrawRect(renderer, &player2);
     DrawCircle(renderer, game_data.ballX, game_data.ballY, 5);
 }

@@ -14,6 +14,7 @@ static struct GameData {
     int player2X = 0;
     int ballX = 0;
     int ballY = 0;
+    int playerNum;
 } game_data;
 
 class MyGame {
