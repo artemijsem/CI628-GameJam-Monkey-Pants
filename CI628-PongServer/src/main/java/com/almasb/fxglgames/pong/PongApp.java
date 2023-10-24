@@ -319,37 +319,35 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     @Override
     public void onReceive(Connection<String> connection, String message) {
         var tokens = message.split(",");
-
         Arrays.stream(tokens).skip(1).forEach(key -> {
+            BatComponent playerEntity = null;
             var stopPlayer = key.substring(0, 1).equals(("W")) || key.substring(0,1).equals("S");
             if (connection.getConnectionNum() == 1) {
-                if (key.endsWith("_DOWN")) {
-                    if (key.substring(0,1).equals("W")) {
-                        player1Bat.up();
-                    }
-                    if (key.substring(0,1).equals("S")) {
-                        player1Bat.down();
-                    }
-                    //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
-                } else if (key.endsWith("_UP")) {
-                    if (stopPlayer) {
-                        player1Bat.stop();
-                    }
-                }
+                playerEntity = player1Bat;
             }
             if (connection.getConnectionNum() == 2) {
-                if (key.endsWith("_DOWN")) {
-                    if (key.substring(0,1).equals("W")) {
-                        player2Bat.up();
-                    }
-                    if (key.substring(0,1).equals("S")) {
-                        player2Bat.down();
-                    }
-                    //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
-                } else if (key.endsWith("_UP")) {
-                    if (stopPlayer) {
-                        player2Bat.stop();
-                    }
+                playerEntity = player2Bat;
+
+            }
+            else playerEntity = player1Bat;
+
+            if (key.endsWith("_DOWN")) {
+                if (key.substring(0,1).equals("W")) {
+                    playerEntity.up();
+                }
+                if (key.substring(0,1).equals("S")) {
+                    playerEntity.down();
+                }
+                if (key.substring(0,1).equals("A")) {
+                    playerEntity.left();
+                }
+                if (key.substring(0,1).equals("D")) {
+                    playerEntity.right();
+                }
+                //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
+            } else if (key.endsWith("_UP")) {
+                if (stopPlayer) {
+                    playerEntity.stop();
                 }
             }
         });
