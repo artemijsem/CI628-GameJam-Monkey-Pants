@@ -144,6 +144,11 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
 
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
+            if (connection.getConnectionNum() == 1) {
+                connection.send("SETUP,P1");
+            } else if (connection.getConnectionNum() == 2) {
+                connection.send("SETUP,P2");
+            }
         });
 
         getGameWorld().addEntityFactory(new PongFactory());
@@ -253,10 +258,36 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         var tokens = message.split(",");
 
         Arrays.stream(tokens).skip(1).forEach(key -> {
-            if (key.endsWith("_DOWN")) {
-                getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
-            } else if (key.endsWith("_UP")) {
-                getInput().mockKeyRelease(KeyCode.valueOf(key.substring(0, 1)));
+            var stopPlayer = key.substring(0, 1).equals(("W")) || key.substring(0,1).equals("S");
+            if (connection.getConnectionNum() == 1) {
+                if (key.endsWith("_DOWN")) {
+                    if (key.substring(0,1).equals("W")) {
+                        player1Bat.up();
+                    }
+                    if (key.substring(0,1).equals("S")) {
+                        player1Bat.down();
+                    }
+                    //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
+                } else if (key.endsWith("_UP")) {
+                    if (stopPlayer) {
+                        player1Bat.stop();
+                    }
+                }
+            }
+            if (connection.getConnectionNum() == 2) {
+                if (key.endsWith("_DOWN")) {
+                    if (key.substring(0,1).equals("W")) {
+                        player2Bat.up();
+                    }
+                    if (key.substring(0,1).equals("S")) {
+                        player2Bat.down();
+                    }
+                    //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
+                } else if (key.endsWith("_UP")) {
+                    if (stopPlayer) {
+                        player2Bat.stop();
+                    }
+                }
             }
         });
     }
