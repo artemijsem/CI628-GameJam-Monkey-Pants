@@ -145,9 +145,9 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
             if (connection.getConnectionNum() == 1) {
-                connection.send("SETUP,P1");
+                connection.send("SETUP,1");
             } else if (connection.getConnectionNum() == 2) {
-                connection.send("SETUP,P2");
+                connection.send("SETUP,2");
             }
         });
 
