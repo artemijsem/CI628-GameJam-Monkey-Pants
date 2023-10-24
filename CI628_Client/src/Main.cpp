@@ -88,7 +88,6 @@ void loop(SDL_Renderer* renderer) {
                     case SDLK_ESCAPE:
                         is_running = false;
                         break;
-
                     default:
                         break;
                 }

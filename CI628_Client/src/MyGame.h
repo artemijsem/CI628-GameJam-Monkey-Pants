@@ -12,12 +12,14 @@ static struct GameData {
     int player2Y = 0;
     int ballX = 0;
     int ballY = 0;
+    int playerNum;
 } game_data;
 
 class MyGame {
 
     private:
-        SDL_Rect player1 = { 0, 0, 20, 60 };
+        SDL_Rect player1 = { 20, 0, 20, 60 };
+        SDL_Rect player2 = { 780, 0, 20, 60 };
 
     public:
         std::vector<std::string> messages;

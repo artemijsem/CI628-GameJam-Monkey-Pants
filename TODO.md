@@ -24,6 +24,7 @@
 ## Monkey
 
 - Poop: Incremental increase from 0 - 100.
+    - 1 per second.
 - Speed: 1 TPS
 - Task: Catch Magic Pants.
 - FOW: 5 Tiles.
@@ -42,7 +43,12 @@
 - Single Use.
 - Reset Poop Level.
 
+## Bananas
+
+- Single Use.
+- Increase Monkey Speed.
+
 # Map Information
 
 - Map Size: 64x64.
-- Top Down.
+- Top Down, 2D.
