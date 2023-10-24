@@ -14,6 +14,8 @@
 ## Client
 
 - Players' FOW.
+    - FOW will always reveal the same amount of tiles. 
+    - Exploring the map and revealing all will make the game never-ending, as both players will always be able to see one another.
 - Update Entities / Timer.
 - Render Game.
 
