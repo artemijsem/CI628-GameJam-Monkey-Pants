@@ -70,6 +70,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         settings.setVersion("1.0");
         settings.setFontUI("pong.ttf");
         settings.setApplicationMode(ApplicationMode.DEBUG);
+        settings.setDeveloperMenuEnabled(true);
     }
 
     private Entity player1;
@@ -202,6 +203,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
             }
         });
 
+
         getGameWorld().addEntityFactory(new PongFactory());
         getGameWorld().addEntityFactory(new LevelFactory());
         Level level = getAssetLoader().loadLevel("level_01.txt", new TextLevelLoader(30, 30,'0'));
@@ -241,7 +243,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
                     server.broadcast(HIT_WALL_DOWN);
                 }
 
-                getGameScene().getViewport().shakeTranslational(5);
+
             }
         });
 
@@ -263,7 +265,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
 
         getPhysicsWorld().addCollisionHandler(ballBatHandler);
         getPhysicsWorld().addCollisionHandler(ballBatHandler.copyFor(EntityType.BALL, EntityType.ENEMY_BAT));
-        getPhysicsWorld().addCollisionHandler(ballBatHandler);
+        getPhysicsWorld().addCollisionHandler(batBatHandler);
     }
 
     @Override
