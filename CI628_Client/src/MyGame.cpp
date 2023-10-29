@@ -94,7 +94,6 @@ void DrawCircle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_
             error += (tx - diameter);
         }
     }
-
 }
 
 // Comment
