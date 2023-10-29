@@ -35,39 +35,33 @@ import com.almasb.fxgl.physics.PhysicsComponent;
  */
 public class BatComponent extends Component {
 
-    private static final double BAT_SPEED = 420;
+    private static final double BAT_SPEED = 60;
 
     protected PhysicsComponent physics;
 
     public void up() {
-        if (entity.getY() >= BAT_SPEED / 60)
+ /*       if (entity.getY() >= BAT_SPEED / 60)*/
             physics.setVelocityY(-BAT_SPEED);
-        else
-            stop();
     }
 
     public void down() {
-        if (entity.getBottomY() <= FXGL.getAppHeight() - (BAT_SPEED / 60))
+        /*if (entity.getBottomY() <= FXGL.getAppHeight() - (BAT_SPEED / 60))*/
             physics.setVelocityY(BAT_SPEED);
-        else
-            stop();
     }
 
     public void left() {
-        if (entity.getX() >= BAT_SPEED / 60)
+        /*if (entity.getX() >= BAT_SPEED / 60)*/
             physics.setVelocityX(-BAT_SPEED);
-        else
-            stop();
     }
 
     public void right() {
-        if (entity.getX() >= BAT_SPEED / 60)
+        /*if (entity.getX() >= BAT_SPEED / 60)*/
             physics.setVelocityX(BAT_SPEED);
-        else
-            stop();
     }
 
     public void stop() {
-        physics.setLinearVelocity(0, 0);
+
+        physics.setLinearVelocity(0,0);
+
     }
 }

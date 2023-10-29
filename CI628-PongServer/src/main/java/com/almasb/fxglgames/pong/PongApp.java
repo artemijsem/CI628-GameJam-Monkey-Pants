@@ -49,10 +49,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import static java.util.Map.entry;
 import static com.almasb.fxgl.dsl.FXGL.*;
 import static com.almasb.fxglgames.pong.NetworkMessages.*;
 
@@ -70,6 +72,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         settings.setVersion("1.0");
         settings.setFontUI("pong.ttf");
         settings.setApplicationMode(ApplicationMode.DEBUG);
+        settings.setDeveloperMenuEnabled(true);
     }
 
     private Entity player1;
@@ -78,10 +81,26 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     private BatComponent player1Bat;
     private BatComponent player2Bat;
 
+    // Last 4 inputs will be logged
+    public HashMap<String, Integer> firstPlayerKeyMap = new HashMap<String, Integer>() {{
+        put("W", 0);
+        put("A", 0);
+        put("S", 0);
+        put("D", 0);
+    }};
+
+    public HashMap<String, Integer> secondPlayerKeyMap = new HashMap<String, Integer>() {{
+        put("W", 0);
+        put("A", 0);
+        put("S", 0);
+        put("D", 0);
+    }};
+
+    HashMap<String, Integer> currentKeyMap = new HashMap<>();
 
     private Server<String> server;
 
-    @Override
+/*    @Override
     protected void initInput() {
         getInput().addAction(new UserAction("Up1") {
             @Override
@@ -176,7 +195,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
                 player2Bat.stop();
             }
         }, KeyCode.L);
-    }
+    }*/
 
 
 
@@ -201,6 +220,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
                 connection.send("SETUP,2");
             }
         });
+
 
         getGameWorld().addEntityFactory(new PongFactory());
         getGameWorld().addEntityFactory(new LevelFactory());
@@ -241,7 +261,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
                     server.broadcast(HIT_WALL_DOWN);
                 }
 
-                getGameScene().getViewport().shakeTranslational(5);
+
             }
         });
 
@@ -263,7 +283,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
 
         getPhysicsWorld().addCollisionHandler(ballBatHandler);
         getPhysicsWorld().addCollisionHandler(ballBatHandler.copyFor(EntityType.BALL, EntityType.ENEMY_BAT));
-        getPhysicsWorld().addCollisionHandler(ballBatHandler);
+        getPhysicsWorld().addCollisionHandler(batBatHandler);
     }
 
     @Override
@@ -281,7 +301,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     protected void onUpdate(double tpf) {
         if (!server.getConnections().isEmpty()) {
             var message = "GAME_DATA," + player1.getY() + "," + player1.getX() + "," +
-                    player2.getY() + "," + player2.getX() + "," + ball.getX() + "," + ball.getY();
+                    player2.getY() + "," + player2.getX();
 
             server.broadcast(message);
         }
@@ -297,7 +317,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     }
 
     private void initGameObjects() {
-        ball = spawn("ball", getAppWidth() / 2 - 5, getAppHeight() / 2 - 5);
+
         player1 = spawn("bat", new SpawnData(getAppWidth() / 4, getAppHeight() / 2 - 30).put("isPlayer", true));
         player2 = spawn("bat", new SpawnData(3 * getAppWidth() / 4 - 20, getAppHeight() / 2 - 30).put("isPlayer", false));
 
@@ -319,41 +339,104 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     @Override
     public void onReceive(Connection<String> connection, String message) {
         var tokens = message.split(",");
-
         Arrays.stream(tokens).skip(1).forEach(key -> {
-            var stopPlayer = key.substring(0, 1).equals(("W")) || key.substring(0,1).equals("S");
+            BatComponent playerEntity = null;
+            var stopPlayer = key.substring(0, 1).equals(("W")) || key.substring(0,1).equals("S")
+                    || key.substring(0,1).equals("A") || key.substring(0,1).equals("D");
+            System.out.println(key.startsWith("W"));
+
+
             if (connection.getConnectionNum() == 1) {
-                if (key.endsWith("_DOWN")) {
-                    if (key.substring(0,1).equals("W")) {
-                        player1Bat.up();
-                    }
-                    if (key.substring(0,1).equals("S")) {
-                        player1Bat.down();
-                    }
-                    //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
-                } else if (key.endsWith("_UP")) {
-                    if (stopPlayer) {
-                        player1Bat.stop();
-                    }
+                playerEntity = player1Bat;
+                currentKeyMap = firstPlayerKeyMap;
+                System.out.println("CONNECTION 1 DETECTED");
+            }
+            else if (connection.getConnectionNum() == 2) {
+                playerEntity = player2Bat;
+                currentKeyMap = secondPlayerKeyMap;
+                System.out.println("CONNECTION 2 DETECTED");
+            }
+            else {playerEntity = player1Bat;}
+
+            if (key.endsWith("_DOWN")) {
+                if (key.substring(0,1).equals("W")) {
+                    currentKeyMap.put("W", 1);
+                    playerEntity.up();
+                    System.out.println("COMMAND TO MOVE UP");
+                }
+                if (key.substring(0,1).equals("S")) {
+                    currentKeyMap.put("S", 1);
+                    playerEntity.down();
+                    System.out.println("COMMAND TO MOVE DOWN");
+                }
+                if (key.substring(0,1).equals("A")) {
+                    currentKeyMap.put("A", 1);
+                    playerEntity.left();
+                    System.out.println("COMMAND TO MOVE LEFT");
+                }
+                if (key.substring(0,1).equals("D")) {
+                    currentKeyMap.put("D", 1);
+                    playerEntity.right();
+                    System.out.println("COMMAND TO MOVE RIGHT");
+                }
+                //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
+            }
+            if (key.endsWith("_UP")) {
+                currentKeyMap.put(key.substring(0,1), 0);
+                System.out.println("Are Keys Up: " + areKeysUp(currentKeyMap));
+                if(stopPlayer && !areKeysUp(currentKeyMap)){
+                    playerEntity.stop();
+                    System.out.println("COMMAND TO STOP");
                 }
             }
-            if (connection.getConnectionNum() == 2) {
-                if (key.endsWith("_DOWN")) {
-                    if (key.substring(0,1).equals("W")) {
-                        player2Bat.up();
-                    }
-                    if (key.substring(0,1).equals("S")) {
-                        player2Bat.down();
-                    }
-                    //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
-                } else if (key.endsWith("_UP")) {
-                    if (stopPlayer) {
-                        player2Bat.stop();
-                    }
-                }
+
+            if (connection.getConnectionNum() == 1) {
+                updateKeyMap(firstPlayerKeyMap, currentKeyMap);
+                System.out.println("UPDATED 1 PLAYER KEYMAP");
             }
+            else if (connection.getConnectionNum() == 2) {
+                playerEntity = player2Bat;
+                currentKeyMap = secondPlayerKeyMap;
+                System.out.println("UPDATED 2 PLAYER KEYMAP");
+            }
+            else {playerEntity = player1Bat;}
+
+            System.out.printf("First Player Key Map: " + firstPlayerKeyMap);
         });
     }
+
+
+    public boolean areKeysUp (HashMap<String, Integer> currentKeyMap)
+    {
+        var pressedKeyNum = 0;
+        for (Integer i : currentKeyMap.values()){
+            if(i > 0)
+            {
+                pressedKeyNum++;
+            }
+
+        }
+        if(pressedKeyNum > 0)
+        {
+            return true;
+        }
+        else {return false;}
+    }
+
+    public void updateKeyMap (HashMap<String, Integer> oldMap, HashMap<String,Integer> newMap)
+    {
+        for (String newKey : newMap.keySet())
+        {
+            for (String oldKey : oldMap.keySet())
+            {
+                if(newKey.equals(oldKey))
+                {
+                    oldMap.put(oldKey, newMap.get(oldKey));
+                }
+            }
+        }
+    }
+
 
     static class MessageWriterS implements TCPMessageWriter<String> {
 
