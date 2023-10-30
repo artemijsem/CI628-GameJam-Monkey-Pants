@@ -17,7 +17,7 @@ static struct GameData {
     int player1X = 0;
     int player2Y = 0;
     int player2X = 0;
-    int playerSize = 20;
+    int playerSize;
     int playerNum;
 } game_data;
 
