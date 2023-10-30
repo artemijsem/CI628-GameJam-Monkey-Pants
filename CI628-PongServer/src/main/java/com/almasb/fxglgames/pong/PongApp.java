@@ -48,6 +48,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -215,10 +218,12 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
             if (connection.getConnectionNum() == 1) {
-                connection.send("SETUP,1");
+                connection.send("SETUP,1,"  );
             } else if (connection.getConnectionNum() == 2) {
                 connection.send("SETUP,2");
             }
+
+            System.out.println((int)player1.getWidth() + "," + (int)player1.getHeight() + "," + (int)player2.getWidth() + "," + (int)player2.getHeight());
         });
 
 
@@ -319,7 +324,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     private void initGameObjects() {
 
         player1 = spawn("bat", new SpawnData(getAppWidth() / 4, getAppHeight() / 2 - 30).put("isPlayer", true));
-        player2 = spawn("bat", new SpawnData(3 * getAppWidth() / 4 - 20, getAppHeight() / 2 - 30).put("isPlayer", false));
+        player2 = spawn("bat", new SpawnData(getAppWidth() / 2 - 20, getAppHeight() / 2 - 30).put("isPlayer", false));
 
         player1Bat = player1.getComponent(BatComponent.class);
         player2Bat = player2.getComponent(BatComponent.class);

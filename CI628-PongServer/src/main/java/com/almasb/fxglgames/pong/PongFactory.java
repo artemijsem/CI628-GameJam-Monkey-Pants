@@ -93,10 +93,11 @@ public class PongFactory implements EntityFactory {
 
         PhysicsComponent physics = new PhysicsComponent();
         physics.setBodyType(BodyType.DYNAMIC);
+        physics.
 
         return entityBuilder(data)
                 .type(isPlayer ? EntityType.PLAYER_BAT : EntityType.ENEMY_BAT)
-                .viewWithBBox(new Rectangle(30, 30, Color.LIGHTGRAY))
+                .viewWithBBox(new Rectangle(20, 20, Color.LIGHTGRAY))
                 .with(new CollidableComponent(true))
                 .with(physics)
                 .with(new BatComponent())

@@ -1,4 +1,8 @@
 #include "SDL_net.h"
+#include <SDL.h>
+#include<SDL_Image.h>
+#include<SDL_ttf.h>
+#include <SDL_mixer.h>
 
 #include "MyGame.h"
 
@@ -10,6 +14,7 @@ const Uint16 PORT = 55555;
 bool is_running = true;
 
 MyGame* game = new MyGame();
+
 
 static int on_receive(void* socket_ptr) {
     TCPsocket socket = (TCPsocket)socket_ptr;
@@ -101,9 +106,13 @@ void loop(SDL_Renderer* renderer) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
+        
+
         game->update();
 
         game->render(renderer);
+
+        
 
         SDL_RenderPresent(renderer);
 
@@ -125,6 +134,7 @@ int run_game() {
     }
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    
 
     if (nullptr == renderer) {
         std::cout << "Failed to create renderer" << SDL_GetError() << std::endl;
