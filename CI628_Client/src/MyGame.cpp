@@ -5,6 +5,8 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     if (cmd == "SETUP")
     {
         game_data.playerNum = stoi(args.at(0));
+        game_data.playerSize = stoi(args.at(1)); 
+        std::cout << "Player Size: " << game_data.playerSize << std::endl;
         std::cout << "Player: " << game_data.playerNum << std::endl;
         std::cout << cmd << std::endl;
 
