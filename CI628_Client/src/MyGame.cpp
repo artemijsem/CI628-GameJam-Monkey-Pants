@@ -29,11 +29,19 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
             game_data.player2X = stoi(args.at(3));
             //game_data.ballX = stoi(args.at(4));
             //game_data.ballY = stoi(args.at(5));
+
             
             
+          
         }
 
-    } else {
+    }
+
+     else if (cmd == "BAT1_HIT_BAT2") {
+        std::cout << "GAME OVER" << std::endl;
+    }
+    
+    else {
         std::cout << "Received: " << cmd << std::endl;
     }
 }
