@@ -1,4 +1,5 @@
 #include "MyGame.h"
+#include "Level.h"
 
 void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     if (cmd == "SETUP")
@@ -6,19 +7,21 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
         game_data.playerNum = stoi(args.at(0));
         std::cout << "Player: " << game_data.playerNum << std::endl;
         std::cout << cmd << std::endl;
+
+        
     }
 
     if (cmd == "GAME_DATA") {
         // we should have exactly 6 arguments
-        if (args.size() == 5) {
+        if (args.size() == 4) {
             game_data.player1Y = stoi(args.at(0));
             game_data.player1X = stoi(args.at(1));
             game_data.player2Y = stoi(args.at(2));
             game_data.player2X = stoi(args.at(3));
-            game_data.level = stoi(args.at(4));
             //game_data.ballX = stoi(args.at(4));
             //game_data.ballY = stoi(args.at(5));
-            std::cout << "Level: " << game_data.level << std::endl;
+            
+            
         }
 
     } else {
@@ -31,25 +34,25 @@ void MyGame::send(std::string message) {
 }
 
 void MyGame::input(SDL_Event& event) {
-    //switch (event.key.keysym.sym) {
-    //    case SDLK_w:
-    //        send(event.type == SDL_KEYDOWN ? "W_DOWN" : "W_UP");
-    //        break;
-    //    case SDLK_s:
-    //        send(event.type == SDL_KEYDOWN ? "S_DOWN" : "S_UP");
-    //        break;
-    //    case SDLK_a:
-    //        send(event.type == SDL_KEYDOWN ? "A_DOWN" : "A_UP");
-    //        break;
-    //    case SDLK_d:
-    //        send(event.type == SDL_KEYDOWN ? "D_DOWN" : "D_UP");
-    //        break;
-    //}
+    switch (event.key.keysym.sym) {
+        case SDLK_w:
+            send(event.type == SDL_KEYDOWN ? "W_DOWN" : "W_UP");
+            break;
+        case SDLK_s:
+            send(event.type == SDL_KEYDOWN ? "S_DOWN" : "S_UP");
+            break;
+        case SDLK_a:
+            send(event.type == SDL_KEYDOWN ? "A_DOWN" : "A_UP");
+            break;
+        case SDLK_d:
+            send(event.type == SDL_KEYDOWN ? "D_DOWN" : "D_UP");
+            break;
+    }
 
-    if(event.key.keysym.sym == SDLK_w) send(event.type == SDL_KEYDOWN ? "W_DOWN" : "W_UP");
-    if(event.key.keysym.sym == SDLK_s) send(event.type == SDL_KEYDOWN ? "S_DOWN" : "S_UP");
-    if(event.key.keysym.sym == SDLK_a) send(event.type == SDL_KEYDOWN ? "A_DOWN" : "A_UP");
-    if(event.key.keysym.sym == SDLK_d) send(event.type == SDL_KEYDOWN ? "D_DOWN" : "D_UP");
+    //if(event.key.keysym.sym == SDLK_w) send(event.type == SDL_KEYDOWN ? "W_DOWN" : "W_UP");
+    //if(event.key.keysym.sym == SDLK_s) send(event.type == SDL_KEYDOWN ? "S_DOWN" : "S_UP");
+    //if(event.key.keysym.sym == SDLK_a) send(event.type == SDL_KEYDOWN ? "A_DOWN" : "A_UP");
+    //if(event.key.keysym.sym == SDLK_d) send(event.type == SDL_KEYDOWN ? "D_DOWN" : "D_UP");
 
 
 }
@@ -102,9 +105,10 @@ void DrawCircle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_
 
 // Comment
 void MyGame::render(SDL_Renderer* renderer) {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    Level* level = new Level(renderer);
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderDrawRect(renderer, &player1);
-
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     SDL_RenderDrawRect(renderer, &player2);
     /*DrawCircle(renderer, game_data.ballX, game_data.ballY, 5);*/
 }

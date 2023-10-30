@@ -218,7 +218,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
             if (connection.getConnectionNum() == 1) {
-                connection.send("SETUP,1");
+                connection.send("SETUP,1,"  );
             } else if (connection.getConnectionNum() == 2) {
                 connection.send("SETUP,2");
             }
@@ -324,7 +324,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     private void initGameObjects() {
 
         player1 = spawn("bat", new SpawnData(getAppWidth() / 4, getAppHeight() / 2 - 30).put("isPlayer", true));
-        player2 = spawn("bat", new SpawnData(3 * getAppWidth() / 4 - 20, getAppHeight() / 2 - 30).put("isPlayer", false));
+        player2 = spawn("bat", new SpawnData(getAppWidth() / 2 - 20, getAppHeight() / 2 - 30).put("isPlayer", false));
 
         player1Bat = player1.getComponent(BatComponent.class);
         player2Bat = player2.getComponent(BatComponent.class);
