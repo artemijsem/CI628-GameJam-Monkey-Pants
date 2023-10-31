@@ -8,6 +8,7 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
         std::cout << "Setup information recevied" << std::endl; 
         game_data.playerNum = stoi(args.at(0));
         game_data.playerSize = stoi(args.at(1)); 
+        game_data.gameTime = stoi(args.at(2)); 
         std::cout << "Player Size: " << game_data.playerSize << std::endl;
        
         player1.h = game_data.playerSize; 
@@ -46,6 +47,10 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
      else if (cmd == "GAME_TIME_OVER")
     {
         pantsWin = true;
+    }
+
+     else if (cmd == "TIMER") {
+        game_data.gameTime = stoi(args.at(0));
     }
     
     else {
@@ -89,6 +94,7 @@ void MyGame::update() {
     player1.x = game_data.player1X;
     player2.y = game_data.player2Y;
     player2.x = game_data.player2X;
+
 }
 
 void MyGame::gameOver(SDL_Renderer* renderer)
@@ -139,6 +145,14 @@ void MyGame::init(SDL_Renderer* renderer)
     level->empty = TextureManager::LoadTexture("../assets/images/ground.png", renderer);
     monkeyText = TextureManager::LoadTexture("../assets/images/Monkey_Char.png", renderer);
     pantsText = TextureManager::LoadTexture("../assets/images/Pants_Char.png", renderer);
+    TTF_Init();
+
+    font = TTF_OpenFont("../assets/fonts/arial.ttf", 72);
+    smallFont = TTF_OpenFont("../assets/fonts/arial.ttf", 24);
+
+
+
+
 }
 
 // Comment
@@ -149,7 +163,37 @@ void MyGame::render(SDL_Renderer* renderer) {
     TextureManager::Draw(renderer, monkeyText, getPlayerOneRect());
     TextureManager::Draw(renderer, pantsText, getPlayerTwoRect());
 
+    drawUI(renderer);
+
     if (monkeyWin) { gameOver(renderer); }
     if (pantsWin) {gameOver(renderer); }
     /*DrawCircle(renderer, game_data.ballX, game_data.ballY, 5);*/
+}
+
+void MyGame::drawUI(SDL_Renderer* renderer) {
+
+    textSurface = TTF_RenderText_Solid(smallFont, "Game Time", textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    textRect = { 700 - textW/2, 50, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    //std::cout << "Drawing UI" << std::endl; 
+    textSurface = TTF_RenderText_Solid(font, std::to_string(game_data.gameTime).c_str(), textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH); 
+    textRect = { 675, 100, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface); 
+    SDL_DestroyTexture(textTexture); 
+}
+
+void MyGame::quitGame() {
+    TTF_CloseFont(font); 
+    TTF_CloseFont(smallFont); 
+    TTF_Quit();
 }

@@ -20,6 +20,7 @@ static struct GameData {
     int player2X = 0;
     int playerSize;
     int playerNum;
+    int gameTime; 
 } game_data;
 
 class MyGame {
@@ -34,6 +35,14 @@ class MyGame {
         SDL_Texture* monkeyText;
         SDL_Texture* pantsText;
         std::vector<std::string> messages;
+        TTF_Font* font = nullptr; 
+        TTF_Font* smallFont = nullptr; 
+        SDL_Colour textColor = { 255, 255, 255 }; 
+        SDL_Surface* textSurface = nullptr; 
+        SDL_Texture* textTexture = nullptr; 
+        SDL_Rect textRect; 
+        int textW, textH; 
+
         bool monkeyWin = false;
         bool pantsWin = false;
         bool pauseMenu = false;
@@ -48,7 +57,9 @@ class MyGame {
         SDL_Rect getPlayerTwoRect() { return player2; }
         void update();
         void render(SDL_Renderer* renderer);
+        void drawUI(SDL_Renderer* renderer);
         void gameOver(SDL_Renderer* renderer);
+        void quitGame(); 
         void setGameWindow(SDL_Window* window) { gameWindow = window; }
         SDL_Window* getGameWindow() { return gameWindow; }
 };

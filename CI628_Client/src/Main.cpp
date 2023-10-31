@@ -190,6 +190,8 @@ int main(int argc, char** argv) {
     
     run_game();
 
+    game->quitGame();
+
     delete game;
 
     // Close connection to the server

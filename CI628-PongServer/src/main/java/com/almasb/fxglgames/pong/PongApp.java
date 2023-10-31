@@ -92,7 +92,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     private BatComponent player1Bat;
     private BatComponent player2Bat;
 
-    public int gameTime = 5;
+    public int gameTime = 30;
     public int maxGameTime = 0;
 
     public TimerAction maxGameTimer;
@@ -232,9 +232,9 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
             if (connection.getConnectionNum() == 1) {
-                connection.send("SETUP,1," + player1Bat.getEntity().getHeight());
+                connection.send("SETUP,1," + player1Bat.getEntity().getHeight()+ "," + gameTime);
             } else if (connection.getConnectionNum() == 2) {
-                connection.send("SETUP,2," + player2Bat.getEntity().getHeight());
+                connection.send("SETUP,2," + player2Bat.getEntity().getHeight() + "," + gameTime);
             }
             inc("numOfConnections", 1);
             System.out.println((int)player1.getWidth() + "," + (int)player1.getHeight() + "," + (int)player2.getWidth() + "," + (int)player2.getHeight());
