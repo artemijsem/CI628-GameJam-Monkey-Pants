@@ -31,6 +31,9 @@ import com.almasb.fxgl.ui.UIController;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 /**
@@ -41,6 +44,7 @@ public class MainUIController implements UIController {
     @FXML
     private Label labelScorePlayer;
 
+    private Text gameTime = new Text("0");
     @FXML
     private Label labelScoreEnemy;
 
@@ -54,8 +58,8 @@ public class MainUIController implements UIController {
 
     @Override
     public void init() {
-        labelScorePlayer.setFont(FXGL.getUIFactory().newFont(72));
-        labelScoreEnemy.setFont(FXGL.getUIFactory().newFont(72));
+        labelScorePlayer.setFont(FXGL.getUIFactoryService().newFont(72));
+        labelScoreEnemy.setFont(FXGL.getUIFactoryService().newFont(72));
 
         labelScoreEnemy.layoutBoundsProperty().addListener((observable, oldValue, newBounds) -> {
             double width = newBounds.getWidth();
@@ -69,6 +73,12 @@ public class MainUIController implements UIController {
         labelScoreEnemy.textProperty().addListener((observable, oldValue, newValue) -> {
             animateLabel(labelScoreEnemy);
         });
+
+        FXGL.addUINode(gameTime, 400, 200);
+        gameTime.setFill(Color.RED);
+        FXGL.set("gameTimerText", gameTime);
+        gameTime.setFont(Font.font(72));
+
     }
 
     private void animateLabel(Label label) {
