@@ -39,10 +39,14 @@ import com.almasb.fxgl.input.UserAction;
 import com.almasb.fxgl.net.*;
 import com.almasb.fxgl.physics.CollisionHandler;
 import com.almasb.fxgl.physics.HitBox;
+import com.almasb.fxgl.time.TimerAction;
 import com.almasb.fxgl.ui.UI;
+import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -61,6 +65,9 @@ import static java.util.Map.entry;
 import static com.almasb.fxgl.dsl.FXGL.*;
 import static com.almasb.fxglgames.pong.NetworkMessages.*;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * A simple clone of Pong.
  * Sounds from https://freesound.org/people/NoiseCollector/sounds/4391/ under CC BY 3.0.
@@ -74,6 +81,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         settings.setTitle("Pong");
         settings.setVersion("1.0");
         settings.setFontUI("pong.ttf");
+        settings.setTicksPerSecond(60);
         settings.setApplicationMode(ApplicationMode.DEBUG);
         settings.setDeveloperMenuEnabled(true);
     }
@@ -83,6 +91,11 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     private Entity ball;
     private BatComponent player1Bat;
     private BatComponent player2Bat;
+
+    public int gameTime = 5;
+    public int maxGameTime = 0;
+
+    public TimerAction maxGameTimer;
 
     // Last 4 inputs will be logged
     public HashMap<String, Integer> firstPlayerKeyMap = new HashMap<String, Integer>() {{
@@ -206,6 +219,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     protected void initGameVars(Map<String, Object> vars) {
         vars.put("player1score", 0);
         vars.put("player2score", 0);
+        vars.put("numOfConnections", 0);
     }
 
     @Override
@@ -222,9 +236,14 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
             } else if (connection.getConnectionNum() == 2) {
                 connection.send("SETUP,2," + player2Bat.getEntity().getHeight());
             }
-
+            inc("numOfConnections", 1);
             System.out.println((int)player1.getWidth() + "," + (int)player1.getHeight() + "," + (int)player2.getWidth() + "," + (int)player2.getHeight());
         });
+
+//        run()
+        eventBuilder().when(() -> geti("numOfConnections") == 1)
+                .thenRun(() -> maxGameTimer=run(getMaxGameTimeReached(), Duration.seconds(1)))
+                .buildAndStart();
 
 
         getGameWorld().addEntityFactory(new PongFactory());
@@ -239,6 +258,40 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         var t = new Thread(server.startTask()::run);
         t.setDaemon(true);
         t.start();
+    }
+
+    @NotNull
+    private Runnable getMaxGameTimeReached() {
+        return () -> {
+            gameTime--;
+            System.out.println("Current Game Time: " + gameTime);
+            Text gameTimerText = geto("gameTimerText");
+            gameTimerText.setText(gameTime + "");
+
+            animationBuilder()
+                    .interpolator(Interpolators.ELASTIC.EASE_IN_OUT())
+                    .duration(Duration.seconds(0.5))
+                    .scale(gameTimerText)
+                    .from(new Point2D(1, 1))
+                    .to(new Point2D(2, 2))
+                    .buildAndPlay();
+
+            animationBuilder()
+                    .interpolator(Interpolators.SMOOTH.EASE_IN())
+                    .duration(Duration.seconds(0.5))
+                    .rotate(gameTimerText)
+                    .from(0)
+                    .to(360)
+                    .buildAndPlay();
+
+            server.broadcast("TIMER, " + gameTime + "");
+
+            if (gameTime <= maxGameTime) {
+                System.out.println("Max Game Time Reached");
+                server.broadcast("GAME_TIME_OVER");
+                maxGameTimer.expire();
+            }
+        };
     }
 
     @Override
@@ -307,8 +360,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         if (!server.getConnections().isEmpty()) {
             var message = "GAME_DATA," + player1.getY() + "," + player1.getX() + "," +
                     player2.getY() + "," + player2.getX();
-
-            server.broadcast(message);
+                        server.broadcast(message);
         }
     }
 
@@ -350,7 +402,6 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
                     || key.substring(0,1).equals("A") || key.substring(0,1).equals("D");
             System.out.println(key.startsWith("W"));
 
-
             if (connection.getConnectionNum() == 1) {
                 playerEntity = player1Bat;
                 currentKeyMap = firstPlayerKeyMap;
@@ -361,7 +412,9 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
                 currentKeyMap = secondPlayerKeyMap;
                 System.out.println("CONNECTION 2 DETECTED");
             }
-            else {playerEntity = player1Bat;}
+            else {
+                playerEntity = player1Bat;
+            }
 
             if (key.endsWith("_DOWN")) {
                 if (key.substring(0,1).equals("W")) {
@@ -406,6 +459,11 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
             }
             else {playerEntity = player1Bat;}
 
+            if (key.equals("CLOSED"))
+            {
+                System.out.println("Client Closed");
+            }
+
             System.out.printf("First Player Key Map: " + firstPlayerKeyMap);
         });
     }
@@ -441,7 +499,6 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
             }
         }
     }
-
 
     static class MessageWriterS implements TCPMessageWriter<String> {
 
