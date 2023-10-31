@@ -289,7 +289,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
 
             if (gameTime <= maxGameTime) {
                 System.out.println("Max Game Time Reached");
-                server.broadcast("GAME_TIME_OVER");
+                server.broadcast("GAME_TIME_OVER,");
                 maxGameTimer.expire();
             }
         };

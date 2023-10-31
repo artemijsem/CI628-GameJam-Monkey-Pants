@@ -166,7 +166,7 @@ void MyGame::render(SDL_Renderer* renderer) {
     drawUI(renderer);
 
     if (monkeyWin) { gameOver(renderer); }
-    if (pantsWin) {gameOver(renderer); }
+    if (pantsWin) { gameOver(renderer); }
     /*DrawCircle(renderer, game_data.ballX, game_data.ballY, 5);*/
 }
 
