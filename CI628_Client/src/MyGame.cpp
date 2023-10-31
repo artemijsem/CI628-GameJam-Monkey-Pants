@@ -93,8 +93,8 @@ void MyGame::update() {
 void MyGame::gameOver(SDL_Renderer* renderer)
 {
     
-    SDL_Surface* monkeyWinImage = IMG_Load("assets/images/Monkey_Win.png");
-    SDL_Surface* pantsWinImage = IMG_Load("assets/images/Pants_Win.png");
+    SDL_Surface* monkeyWinImage = IMG_Load("../assets/images/Monkey_Win.png");
+    SDL_Surface* pantsWinImage = IMG_Load("../assets/images/Pants_Win.png");
     SDL_Surface* mainGameSurface = SDL_GetWindowSurface(gameWindow);
     
 
