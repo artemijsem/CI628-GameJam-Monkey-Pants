@@ -38,7 +38,13 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     }
 
      else if (cmd == "BAT1_HIT_BAT2") {
-        std::cout << "GAME OVER" << std::endl;
+        
+        monkeyWin = true;
+     }
+
+     else if (cmd == "GAME_TIME_OVER")
+    {
+        pantsWin = true;
     }
     
     else {
@@ -64,6 +70,9 @@ void MyGame::input(SDL_Event& event) {
         case SDLK_d:
             send(event.type == SDL_KEYDOWN ? "D_DOWN" : "D_UP");
             break;
+        case SDLK_ESCAPE:
+            pauseMenu = true;
+            break;
     }
 
     //if(event.key.keysym.sym == SDLK_w) send(event.type == SDL_KEYDOWN ? "W_DOWN" : "W_UP");
@@ -81,42 +90,45 @@ void MyGame::update() {
     player2.x = game_data.player2X;
 }
 
-void DrawCircle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_t radius)
+void MyGame::gameOver(SDL_Renderer* renderer)
 {
-    const int32_t diameter = (radius * 2);
+    
+    SDL_Surface* monkeyWinImage = IMG_Load("../assets/images/Monkey_Win.png");
+    SDL_Surface* pantsWinImage = IMG_Load("../assets/images/Pants_Win.png");
+    SDL_Surface* mainGameSurface = SDL_GetWindowSurface(gameWindow);
+    
 
-    int32_t x = (radius - 1);
-    int32_t y = 0;
-    int32_t tx = 1;
-    int32_t ty = 1;
-    int32_t error = (tx - diameter);
 
-    while (x >= y)
+    if (monkeyWin)
     {
-        //  Each of the following renders an octant of the circle
-        SDL_RenderDrawPoint(renderer, centreX + x, centreY - y);
-        SDL_RenderDrawPoint(renderer, centreX + x, centreY + y);
-        SDL_RenderDrawPoint(renderer, centreX - x, centreY - y);
-        SDL_RenderDrawPoint(renderer, centreX - x, centreY + y);
-        SDL_RenderDrawPoint(renderer, centreX + y, centreY - x);
-        SDL_RenderDrawPoint(renderer, centreX + y, centreY + x);
-        SDL_RenderDrawPoint(renderer, centreX - y, centreY - x);
-        SDL_RenderDrawPoint(renderer, centreX - y, centreY + x);
-
-        if (error <= 0)
-        {
-            ++y;
-            error += ty;
-            ty += 2;
-        }
-
-        if (error > 0)
-        {
-            --x;
-            tx += 2;
-            error += (tx - diameter);
-        }
+        SDL_BlitSurface(monkeyWinImage, NULL, mainGameSurface, NULL);
     }
+
+    if (pantsWin)
+    {
+        SDL_BlitSurface(pantsWinImage, NULL, mainGameSurface, NULL);
+    }
+    
+
+
+
+        
+    SDL_UpdateWindowSurface(gameWindow);
+    SDL_Delay(5000);
+    
+    if (monkeyWin)
+    {
+        SDL_FreeSurface(monkeyWinImage);
+    }
+
+    if (pantsWin)
+    {
+        SDL_FreeSurface(pantsWinImage);
+    }
+
+    gameIsOver = true;
+
+    
 }
 
 // Comment
@@ -126,5 +138,8 @@ void MyGame::render(SDL_Renderer* renderer) {
     SDL_RenderDrawRect(renderer, &player1);
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     SDL_RenderDrawRect(renderer, &player2);
+
+    if (monkeyWin) { gameOver(renderer); }
+    if (pantsWin) {gameOver(renderer); }
     /*DrawCircle(renderer, game_data.ballX, game_data.ballY, 5);*/
 }

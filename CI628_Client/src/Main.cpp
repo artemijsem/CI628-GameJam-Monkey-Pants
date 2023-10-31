@@ -116,6 +116,11 @@ void loop(SDL_Renderer* renderer) {
 
         SDL_RenderPresent(renderer);
 
+        if (game->gameIsOver)
+        {
+            is_running = false;
+        }
+
         SDL_Delay(17);
     }
 }
@@ -132,6 +137,8 @@ int run_game() {
         std::cout << "Failed to create window" << SDL_GetError() << std::endl;
         return -1;
     }
+
+    game->setGameWindow(window);
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     
