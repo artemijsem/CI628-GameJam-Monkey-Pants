@@ -226,6 +226,8 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
             System.out.println((int)player1.getWidth() + "," + (int)player1.getHeight() + "," + (int)player2.getWidth() + "," + (int)player2.getHeight());
         });
 
+        
+
 
         getGameWorld().addEntityFactory(new PongFactory());
         getGameWorld().addEntityFactory(new LevelFactory());

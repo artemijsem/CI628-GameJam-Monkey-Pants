@@ -26,9 +26,14 @@ class MyGame {
     private:
         SDL_Rect player1 = { 0, 0, game_data.playerSize, game_data.playerSize };
         SDL_Rect player2 = { 600, 300, game_data.playerSize, game_data.playerSize };
+        SDL_Window* gameWindow = nullptr;
 
     public:
         std::vector<std::string> messages;
+        bool monkeyWin = false;
+        bool pantsWin = false;
+        bool pauseMenu = false;
+        bool gameIsOver = false;
        
 
         void on_receive(std::string message, std::vector<std::string>& args);
@@ -36,6 +41,9 @@ class MyGame {
         void input(SDL_Event& event);
         void update();
         void render(SDL_Renderer* renderer);
+        void gameOver(SDL_Renderer* renderer);
+        void setGameWindow(SDL_Window* window) { gameWindow = window; }
+        SDL_Window* getGameWindow() { return gameWindow; }
 };
 
 #endif
