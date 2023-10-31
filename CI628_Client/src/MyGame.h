@@ -25,8 +25,8 @@ static struct GameData {
 class MyGame {
 
     private:
-        SDL_Rect player1 = { 0, 0, game_data.playerSize, game_data.playerSize };
-        SDL_Rect player2 = { 600, 300, game_data.playerSize, game_data.playerSize };
+        SDL_Rect player1 = { 0, 0, 40, 40 };
+        SDL_Rect player2 = { 600, 300, 40, 40 };
         SDL_Window* gameWindow = nullptr;
 
     public:
