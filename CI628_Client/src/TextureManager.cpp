@@ -17,9 +17,9 @@ SDL_Texture* TextureManager::LoadTexture(const char* pFilename, SDL_Renderer* re
 //=================================================================================
 
 
-void TextureManager::Draw(SDL_Renderer* renderer, SDL_Texture* pTexture, SDL_Rect pSourceRect, SDL_Rect pDestinationRect)
+void TextureManager::Draw(SDL_Renderer* renderer, SDL_Texture* pTexture, SDL_Rect pDestinationRect)
 {
-	SDL_RenderCopy(renderer, pTexture, &pSourceRect, &pDestinationRect);
+	SDL_RenderCopy(renderer, pTexture, NULL, &pDestinationRect);
 
 }//---
 //=================================================================================

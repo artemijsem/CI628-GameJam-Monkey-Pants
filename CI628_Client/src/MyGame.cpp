@@ -1,5 +1,6 @@
 #include "MyGame.h"
 #include "Level.h"
+#include "TextureManager.h"
 
 void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     if (cmd == "SETUP")
@@ -131,13 +132,22 @@ void MyGame::gameOver(SDL_Renderer* renderer)
     
 }
 
+void MyGame::init(SDL_Renderer* renderer)
+{
+    level = new Level(renderer);
+    level->wall = TextureManager::LoadTexture("../assets/images/wall.png", renderer);
+    level->empty = TextureManager::LoadTexture("../assets/images/ground.png", renderer);
+    monkeyText = TextureManager::LoadTexture("../assets/images/Monkey_Char.png", renderer);
+    pantsText = TextureManager::LoadTexture("../assets/images/Pants_Char.png", renderer);
+}
+
 // Comment
 void MyGame::render(SDL_Renderer* renderer) {
-    Level* level = new Level(renderer);
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &player1);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderDrawRect(renderer, &player2);
+    level->drawMap(renderer);
+
+
+    TextureManager::Draw(renderer, monkeyText, getPlayerOneRect());
+    TextureManager::Draw(renderer, pantsText, getPlayerTwoRect());
 
     if (monkeyWin) { gameOver(renderer); }
     if (pantsWin) {gameOver(renderer); }

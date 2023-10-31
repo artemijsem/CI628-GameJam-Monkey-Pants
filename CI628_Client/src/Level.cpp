@@ -11,7 +11,6 @@ Level::Level(SDL_Renderer* renderer)
 	
 
     createLevelFromString(levelText);
-	drawMap(renderer);
 }
 
 void Level::createLevelFromString(std::string level)
@@ -47,11 +46,11 @@ void Level::drawMap(SDL_Renderer* renderer)
 			{
 			case 0:
 				
+				TextureManager::Draw(renderer, empty, dest);
 				break;
 			case 1:
 				/*TextureManager::Draw(wall, src, dest);*/
-				SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-				SDL_RenderDrawRect(renderer, &dest);
+				TextureManager::Draw(renderer, wall, dest);
 				break;
 			default:
 				break;

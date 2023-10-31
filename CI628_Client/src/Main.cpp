@@ -147,6 +147,7 @@ int run_game() {
         std::cout << "Failed to create renderer" << SDL_GetError() << std::endl;
         return -1;
     }
+    game->init(renderer);
 
     loop(renderer);
 
@@ -186,6 +187,7 @@ int main(int argc, char** argv) {
     SDL_CreateThread(on_receive, "ConnectionReceiveThread", (void*)socket);
     SDL_CreateThread(on_send, "ConnectionSendThread", (void*)socket);
 
+    
     run_game();
 
     delete game;

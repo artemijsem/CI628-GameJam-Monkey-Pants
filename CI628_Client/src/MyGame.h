@@ -11,6 +11,7 @@
 #include <string>
 
 #include "SDL.h"
+#include "Level.h"
 
 static struct GameData {
     int player1Y = 0;
@@ -29,6 +30,9 @@ class MyGame {
         SDL_Window* gameWindow = nullptr;
 
     public:
+        Level* level = nullptr;
+        SDL_Texture* monkeyText;
+        SDL_Texture* pantsText;
         std::vector<std::string> messages;
         bool monkeyWin = false;
         bool pantsWin = false;
@@ -38,7 +42,10 @@ class MyGame {
 
         void on_receive(std::string message, std::vector<std::string>& args);
         void send(std::string message);
+        void init(SDL_Renderer* renderer);
         void input(SDL_Event& event);
+        SDL_Rect getPlayerOneRect() { return player1; }
+        SDL_Rect getPlayerTwoRect() { return player2; }
         void update();
         void render(SDL_Renderer* renderer);
         void gameOver(SDL_Renderer* renderer);
