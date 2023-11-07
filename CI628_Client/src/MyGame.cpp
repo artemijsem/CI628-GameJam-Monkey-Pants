@@ -52,6 +52,11 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
      else if (cmd == "TIMER") {
         game_data.gameTime = stoi(args.at(0));
     }
+
+     else if (cmd == "SPAWN_BOMB")
+    {
+
+    }
     
     else {
         std::cout << "Received: " << cmd << std::endl;
@@ -75,6 +80,9 @@ void MyGame::input(SDL_Event& event) {
             break;
         case SDLK_d:
             send(event.type == SDL_KEYDOWN ? "D_DOWN" : "D_UP");
+            break;
+        case SDLK_SPACE:
+            send(event.type == SDL_KEYDOWN ? "SPACE_DOWN" : "SPACE_UP");
             break;
         case SDLK_ESCAPE:
             pauseMenu = true;

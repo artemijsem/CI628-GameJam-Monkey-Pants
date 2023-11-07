@@ -28,12 +28,16 @@ class MyGame {
     private:
         SDL_Rect player1 = { 0, 0, 40, 40 };
         SDL_Rect player2 = { 600, 300, 40, 40 };
+        SDL_Rect bomb_arr[50];
+        SDL_Rect bomb_explosion_arr[500];
         SDL_Window* gameWindow = nullptr;
 
     public:
         Level* level = nullptr;
         SDL_Texture* monkeyText;
         SDL_Texture* pantsText;
+        SDL_Texture* bombText;
+        SDL_Texture* explosionText;
         std::vector<std::string> messages;
         TTF_Font* font = nullptr; 
         TTF_Font* smallFont = nullptr; 
