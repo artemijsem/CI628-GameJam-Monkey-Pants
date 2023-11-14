@@ -49,7 +49,7 @@ import static com.almasb.fxgl.dsl.FXGL.*;
 /**
  * @author Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
  */
-public class PongFactory implements EntityFactory {
+public class BombermanFactory implements EntityFactory {
 
     @Spawns("ball")
     public Entity newBall(SpawnData data) {
@@ -83,7 +83,7 @@ public class PongFactory implements EntityFactory {
                 .with(physics)
                 .with(new CollidableComponent(true))
                 .with(new ParticleComponent(emitter))
-                .with(new BallComponent())
+                .with(new PlayerComponent())
                 .build();
     }
 
@@ -99,7 +99,7 @@ public class PongFactory implements EntityFactory {
                 .viewWithBBox(new Rectangle(20, 20, Color.LIGHTGRAY))
                 .with(new CollidableComponent(true))
                 .with(physics)
-                .with(new BatComponent())
+                .with(new PlayerComponent())
                 .build();
     }
 }

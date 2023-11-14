@@ -33,7 +33,7 @@ import com.almasb.fxgl.physics.PhysicsComponent;
 /**
  * @author Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
  */
-public class BatComponent extends Component {
+public class PlayerComponent extends Component {
 
     private static final double BAT_SPEED = 60;
 

@@ -35,14 +35,12 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.level.Level;
 import com.almasb.fxgl.entity.level.text.TextLevelLoader;
-import com.almasb.fxgl.input.UserAction;
 import com.almasb.fxgl.net.*;
 import com.almasb.fxgl.physics.CollisionHandler;
 import com.almasb.fxgl.physics.HitBox;
 import com.almasb.fxgl.time.TimerAction;
 import com.almasb.fxgl.ui.UI;
 import javafx.geometry.Point2D;
-import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -52,21 +50,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static java.util.Map.entry;
 import static com.almasb.fxgl.dsl.FXGL.*;
 import static com.almasb.fxglgames.pong.NetworkMessages.*;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * A simple clone of Pong.
@@ -74,7 +65,7 @@ import java.util.TimerTask;
  *
  * @author Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
  */
-public class PongApp extends GameApplication implements MessageHandler<String> {
+public class BombermanApp extends GameApplication implements MessageHandler<String> {
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -89,8 +80,8 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     private Entity player1;
     private Entity player2;
     private Entity ball;
-    private BatComponent player1Bat;
-    private BatComponent player2Bat;
+    private PlayerComponent player1Bat;
+    private PlayerComponent player2Bat;
 
     public int gameTime = 30;
     public int maxGameTime = 0;
@@ -247,7 +238,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
                 .buildAndStart();
         
 
-        getGameWorld().addEntityFactory(new PongFactory());
+        getGameWorld().addEntityFactory(new BombermanFactory());
         getGameWorld().addEntityFactory(new LevelFactory());
         Level level = getAssetLoader().loadLevel("level_01.txt", new TextLevelLoader(30, 30,'0'));
         getGameWorld().setLevel(level);
@@ -365,6 +356,12 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         }
     }
 
+    public void onBrickDestroyed(Entity brick)
+    {
+        brick.
+    }
+
+
     private void initScreenBounds() {
         Entity walls = entityBuilder()
                 .type(EntityType.WALL)
@@ -379,8 +376,8 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
         player1 = spawn("bat", new SpawnData(getAppWidth() / 4, getAppHeight() / 2 - 30).put("isPlayer", true));
         player2 = spawn("bat", new SpawnData(getAppWidth() / 2 - 20, getAppHeight() / 2 - 30).put("isPlayer", false));
 
-        player1Bat = player1.getComponent(BatComponent.class);
-        player2Bat = player2.getComponent(BatComponent.class);
+        player1Bat = player1.getComponent(PlayerComponent.class);
+        player2Bat = player2.getComponent(PlayerComponent.class);
     }
 
     private void playHitAnimation(Entity bat) {
@@ -398,7 +395,7 @@ public class PongApp extends GameApplication implements MessageHandler<String> {
     public void onReceive(Connection<String> connection, String message) {
         var tokens = message.split(",");
         Arrays.stream(tokens).skip(1).forEach(key -> {
-            BatComponent playerEntity = null;
+            PlayerComponent playerEntity = null;
             var stopPlayer = key.substring(0, 1).equals(("W")) || key.substring(0,1).equals("S")
                     || key.substring(0,1).equals("A") || key.substring(0,1).equals("D");
             System.out.println(key.startsWith("W"));

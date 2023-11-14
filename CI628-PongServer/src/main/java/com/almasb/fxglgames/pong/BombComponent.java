@@ -25,10 +25,10 @@
  */
 
 package com.almasb.fxglgames.pong;
-
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.physics.PhysicsComponent;
-import javafx.geometry.Point2D;
+import com.almasb.fxgl.entity.components.BoundingBoxComponent;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 import static java.lang.Math.abs;
@@ -37,36 +37,30 @@ import static java.lang.Math.signum;
 /**
  * @author Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
  */
-public class BallComponent extends Component {
+public class BombComponent extends Component {
 
+    private int radius;
     private PhysicsComponent physics;
 
-    @Override
-    public void onUpdate(double tpf) {
-        limitVelocity();
-        checkOffscreen();
+    public BombComponent(int radius)
+    {
+        this.radius = radius;
     }
 
-    private void limitVelocity() {
-        // we don't want the ball to move too slow in X direction
-        if (abs(physics.getVelocityX()) < 5 * 60) {
-            physics.setVelocityX(signum(physics.getVelocityX()) * 5 * 60);
-        }
+    public void explode()
+    {
+        BoundingBoxComponent bbox = entity.getBoundingBoxComponent();
 
-        // we don't want the ball to move too fast in Y direction
-        if (abs(physics.getVelocityY()) > 5 * 60 * 2) {
-            physics.setVelocityY(signum(physics.getVelocityY()) * 5 * 60);
-        }
+        getGameWorld()
+                .getEntitiesInRange(bbox.range(radius, radius))
+                .stream()
+                .filter(e -> e.isType(EntityType.BRICK))
+                .forEach(e -> {
+                    FXGL.<BombermanApp>getAppCast().onBrickDestroyed(e);
+                    e.removeFromWorld();
+                });
+
+        entity.removeFromWorld();
     }
 
-    // this is a hack:
-    // we use a physics engine, so it is possible to push the ball through a wall to outside of the screen
-    private void checkOffscreen() {
-        if (getEntity().getBoundingBoxComponent().isOutside(getGameScene().getViewport().getVisibleArea())) {
-            physics.overwritePosition(new Point2D(
-                    getAppWidth() / 2,
-                    getAppHeight() / 2
-            ));
-        }
-    }
 }
