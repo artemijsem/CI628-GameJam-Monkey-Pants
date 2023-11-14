@@ -86,6 +86,8 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     public int gameTime = 30;
     public int maxGameTime = 0;
 
+    public int TILE_SIZE = 30;
+
     public TimerAction maxGameTimer;
 
     // Last 4 inputs will be logged
@@ -290,7 +292,7 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     protected void initPhysics() {
         getPhysicsWorld().setGravity(0, 0);
 
-        getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.BALL, EntityType.WALL) {
+       /* getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.BALL, EntityType.WALL) {
             @Override
             protected void onHitBoxTrigger(Entity a, Entity b, HitBox boxA, HitBox boxB) {
                 if (boxB.getName().equals("LEFT")) {
@@ -313,14 +315,14 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
 
             }
-        });
+        });*/
 
-        CollisionHandler ballBatHandler = new CollisionHandler(EntityType.BALL, EntityType.PLAYER_BAT) {
+        CollisionHandler bombPlayerHandler = new CollisionHandler(EntityType.BOMB, EntityType.PLAYER) {
             @Override
-            protected void onCollisionBegin(Entity a, Entity bat) {
-                playHitAnimation(bat);
+            protected void onCollisionBegin(Entity bomb, Entity player) {
 
-                server.broadcast(bat == player1 ? BALL_HIT_BAT1 : BALL_HIT_BAT2);
+
+                server.broadcast(player == player1 ? BALL_HIT_BAT1 : BALL_HIT_BAT2);
             }
         };
 
@@ -358,7 +360,14 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
     public void onBrickDestroyed(Entity brick)
     {
-        brick.
+        int cellX = (int)((brick.getX() + 20) / TILE_SIZE);
+        int cellY = (int)((brick.getY() + 20) / TILE_SIZE);
+
+
+
+        if (FXGLMath.randomBoolean()) {
+            spawn("Powerup", cellX * 40, cellY * 40);
+        }
     }
 
 
