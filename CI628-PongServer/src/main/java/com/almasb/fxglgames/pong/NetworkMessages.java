@@ -5,14 +5,10 @@ package com.almasb.fxglgames.pong;
  */
 public class NetworkMessages {
 
-    public static final String HIT_WALL_LEFT = "HIT_WALL_LEFT";
-    public static final String HIT_WALL_RIGHT = "HIT_WALL_RIGHT";
-    public static final String HIT_WALL_UP = "HIT_WALL_UP";
-    public static final String HIT_WALL_DOWN = "HIT_WALL_DOWN";
 
 
-    public static final String BALL_HIT_BAT1 = "BALL_HIT_BAT1";
-    public static final String BALL_HIT_BAT2 = "BALL_HIT_BAT2";
-
-    public static final String BAT1_HIT_BAT2 = "BAT1_HIT_BAT2";
+    public static final String BOMB_HIT_PLAYER_ONE = "BOMB_HIT_PLAYER_ONE";
+    public static final String BOMB_HIT_PLAYER_TWO = "BOMB_HIT_PLAYER_TWO";
+    public static final String BOMB_HIT_PLAYER_THR = "BOMB_HIT_PLAYER_THR";
+    public static final String BOMB_HIT_PLAYER_FOR = "BOMB_HIT_PLAYER_FOR";
 }

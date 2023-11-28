@@ -51,8 +51,8 @@ import static com.almasb.fxgl.dsl.FXGL.*;
  */
 public class BombermanFactory implements EntityFactory {
 
-    @Spawns("ball")
-    public Entity newBall(SpawnData data) {
+    @Spawns("bomb")
+    public Entity newBomb(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
         physics.setBodyType(BodyType.DYNAMIC);
         physics.setFixtureDef(new FixtureDef().density(0.3f).restitution(1.0f));
@@ -78,7 +78,7 @@ public class BombermanFactory implements EntityFactory {
         emitter.setEmissionRate(1);
 
         return entityBuilder(data)
-                .type(EntityType.BALL)
+                .type(EntityType.BOMB)
                 .bbox(new HitBox(BoundingShape.circle(5)))
                 .with(physics)
                 .with(new CollidableComponent(true))
@@ -87,15 +87,14 @@ public class BombermanFactory implements EntityFactory {
                 .build();
     }
 
-    @Spawns("bat")
-    public Entity newBat(SpawnData data) {
-        boolean isPlayer = data.get("isPlayer");
+    @Spawns("player")
+    public Entity newPlayer(SpawnData data) {
 
         PhysicsComponent physics = new PhysicsComponent();
         physics.setBodyType(BodyType.DYNAMIC);
 
         return entityBuilder(data)
-                .type(isPlayer ? EntityType.PLAYER_BAT : EntityType.ENEMY_BAT)
+                .type(EntityType.PLAYER)
                 .viewWithBBox(new Rectangle(20, 20, Color.LIGHTGRAY))
                 .with(new CollidableComponent(true))
                 .with(physics)

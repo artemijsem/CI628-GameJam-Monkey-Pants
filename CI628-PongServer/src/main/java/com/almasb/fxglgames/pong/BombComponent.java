@@ -51,6 +51,7 @@ public class BombComponent extends Component {
     {
         BoundingBoxComponent bbox = entity.getBoundingBoxComponent();
 
+        // Destroy bricks
         getGameWorld()
                 .getEntitiesInRange(bbox.range(radius, radius))
                 .stream()
@@ -59,6 +60,16 @@ public class BombComponent extends Component {
                     FXGL.<BombermanApp>getAppCast().onBrickDestroyed(e);
                     e.removeFromWorld();
                 });
+
+        // Damage players
+        getGameWorld()
+                .getEntitiesInRange(bbox.range(radius, radius))
+                .stream()
+                .filter(e -> e.isType(EntityType.PLAYER))
+                .forEach(e -> {
+                    FXGL.<BombermanApp>getAppCast().onPlayerDamaged(e);
+                });
+
 
         entity.removeFromWorld();
     }

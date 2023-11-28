@@ -29,7 +29,15 @@ package com.almasb.fxglgames.pong;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.physics.PhysicsComponent;
+import com.almasb.fxglgames.pong.BombComponent;
+import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.SpawnData;
+import com.almasb.fxgl.entity.component.Component;
+import com.almasb.fxglgames.pong.BombermanApp;
+import javafx.util.Duration;
 
+import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
+import static com.almasb.fxgl.dsl.FXGL.spawn;
 /**
  * @author Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
  */
@@ -38,6 +46,15 @@ public class PlayerComponent extends Component {
     private static final double BAT_SPEED = 60;
 
     protected PhysicsComponent physics;
+
+    public int playerNum = 0;
+
+    public int lives = 3;
+
+    public int maxBombs = 1;
+
+    public int bombsPlaced = 0;
+    public int bombRadius = BombermanApp.TILE_SIZE;
 
     public void up() {
  /*       if (entity.getY() >= BAT_SPEED / 60)*/
@@ -63,5 +80,19 @@ public class PlayerComponent extends Component {
 
         physics.setLinearVelocity(0,0);
 
+    }
+    public void placeBomb() {
+        if (bombsPlaced == maxBombs) {
+            return;
+        }
+
+        bombsPlaced++;
+
+        Entity bomb = spawn("Bomb", new SpawnData(this.getEntity().getX(), this.getEntity().getY()).put("radius", bombRadius));
+
+        getGameTimer().runOnceAfter(() -> {
+            bomb.getComponent(BombComponent.class).explode();
+            bombsPlaced--;
+        }, Duration.seconds(2));
     }
 }

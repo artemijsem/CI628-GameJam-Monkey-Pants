@@ -77,16 +77,16 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         settings.setDeveloperMenuEnabled(true);
     }
 
-    private Entity player1;
-    private Entity player2;
+    private Entity player1, player2, player3, player4;
+
     private Entity ball;
-    private PlayerComponent player1Bat;
-    private PlayerComponent player2Bat;
+    private PlayerComponent player1Comp, player2Comp, player3Comp, player4Comp;
+
 
     public int gameTime = 30;
     public int maxGameTime = 0;
 
-    public int TILE_SIZE = 30;
+    public static final int TILE_SIZE = 30;
 
     public TimerAction maxGameTimer;
 
@@ -96,6 +96,7 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         put("A", 0);
         put("S", 0);
         put("D", 0);
+        put("F", 0);
     }};
 
     public HashMap<String, Integer> secondPlayerKeyMap = new HashMap<String, Integer>() {{
@@ -103,6 +104,23 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         put("A", 0);
         put("S", 0);
         put("D", 0);
+        put("F", 0);
+    }};
+
+    public HashMap<String, Integer> thirdPlayerKeyMap = new HashMap<String, Integer>() {{
+        put("W", 0);
+        put("A", 0);
+        put("S", 0);
+        put("D", 0);
+        put("F", 0);
+    }};
+
+    public HashMap<String, Integer> fourthPlayerKeyMap = new HashMap<String, Integer>() {{
+        put("W", 0);
+        put("A", 0);
+        put("S", 0);
+        put("D", 0);
+        put("F", 0);
     }};
 
     HashMap<String, Integer> currentKeyMap = new HashMap<>();
@@ -225,12 +243,16 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
             if (connection.getConnectionNum() == 1) {
-                connection.send("SETUP,1," + player1Bat.getEntity().getHeight()+ "," + gameTime);
+                connection.send("SETUP,1," + player1Comp.getEntity().getHeight()+ "," + gameTime);
             } else if (connection.getConnectionNum() == 2) {
-                connection.send("SETUP,2," + player2Bat.getEntity().getHeight() + "," + gameTime);
+                connection.send("SETUP,2," + player2Comp.getEntity().getHeight() + "," + gameTime);
+            } else if (connection.getConnectionNum() == 3) {
+                connection.send("SETUP,3," + player3Comp.getEntity().getHeight() + "," + gameTime);
+            } else if (connection.getConnectionNum() == 4) {
+                connection.send("SETUP,4," + player4Comp.getEntity().getHeight() + "," + gameTime);
             }
             inc("numOfConnections", 1);
-            System.out.println((int)player1.getWidth() + "," + (int)player1.getHeight() + "," + (int)player2.getWidth() + "," + (int)player2.getHeight());
+
         });
 
 
@@ -292,50 +314,33 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     protected void initPhysics() {
         getPhysicsWorld().setGravity(0, 0);
 
-       /* getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.BALL, EntityType.WALL) {
-            @Override
-            protected void onHitBoxTrigger(Entity a, Entity b, HitBox boxA, HitBox boxB) {
-                if (boxB.getName().equals("LEFT")) {
-                    inc("player2score", +1);
 
-                    server.broadcast("SCORES," + geti("player1score") + "," + geti("player2score"));
-
-                    server.broadcast(HIT_WALL_LEFT);
-                } else if (boxB.getName().equals("RIGHT")) {
-                    inc("player1score", +1);
-
-                    server.broadcast("SCORES," + geti("player1score") + "," + geti("player2score"));
-
-                    server.broadcast(HIT_WALL_RIGHT);
-                } else if (boxB.getName().equals("TOP")) {
-                    server.broadcast(HIT_WALL_UP);
-                } else if (boxB.getName().equals("BOT")) {
-                    server.broadcast(HIT_WALL_DOWN);
-                }
-
-
-            }
-        });*/
 
         CollisionHandler bombPlayerHandler = new CollisionHandler(EntityType.BOMB, EntityType.PLAYER) {
             @Override
             protected void onCollisionBegin(Entity bomb, Entity player) {
 
-
-                server.broadcast(player == player1 ? BALL_HIT_BAT1 : BALL_HIT_BAT2);
+                switch (player.getComponent(PlayerComponent.class).playerNum)
+                {
+                    case 1:
+                        server.broadcast(BOMB_HIT_PLAYER_ONE);
+                        break;
+                    case 2:
+                        server.broadcast(BOMB_HIT_PLAYER_TWO);
+                        break;
+                    case 3:
+                        server.broadcast(BOMB_HIT_PLAYER_THR);
+                        break;
+                    case 4:
+                        server.broadcast(BOMB_HIT_PLAYER_FOR);
+                        break;
+                }
             }
         };
 
-        CollisionHandler batBatHandler = new CollisionHandler(EntityType.PLAYER_BAT, EntityType.ENEMY_BAT) {
-            @Override
-            protected void onCollisionBegin(Entity a, Entity b) {
-                server.broadcast(BAT1_HIT_BAT2);
-            }
-        };
 
-        getPhysicsWorld().addCollisionHandler(ballBatHandler);
-        getPhysicsWorld().addCollisionHandler(ballBatHandler.copyFor(EntityType.BALL, EntityType.ENEMY_BAT));
-        getPhysicsWorld().addCollisionHandler(batBatHandler);
+        getPhysicsWorld().addCollisionHandler(bombPlayerHandler);
+
     }
 
     @Override
@@ -370,6 +375,11 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         }
     }
 
+    public void onPlayerDamaged(Entity player)
+    {
+        player.getComponent(PlayerComponent.class).lives--;
+    }
+
 
     private void initScreenBounds() {
         Entity walls = entityBuilder()
@@ -382,11 +392,19 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
     private void initGameObjects() {
 
-        player1 = spawn("bat", new SpawnData(getAppWidth() / 4, getAppHeight() / 2 - 30).put("isPlayer", true));
-        player2 = spawn("bat", new SpawnData(getAppWidth() / 2 - 20, getAppHeight() / 2 - 30).put("isPlayer", false));
+        player1 = spawn("player", new SpawnData(getAppWidth() / 4, getAppHeight() / 4));
+        player2 = spawn("player", new SpawnData((getAppWidth() / 4 ) * 3, getAppHeight() / 4));
+        player3 = spawn("player", new SpawnData(getAppWidth() / 4, (getAppHeight() / 4) * 3));
+        player4 = spawn("player", new SpawnData((getAppWidth() / 4) * 3, (getAppHeight() / 4) * 3));
 
-        player1Bat = player1.getComponent(PlayerComponent.class);
-        player2Bat = player2.getComponent(PlayerComponent.class);
+        player1Comp = player1.getComponent(PlayerComponent.class);
+        player1Comp.playerNum = 1;
+        player2Comp = player2.getComponent(PlayerComponent.class);
+        player2Comp.playerNum = 2;
+        player3Comp = player3.getComponent(PlayerComponent.class);
+        player3Comp.playerNum = 3;
+        player4Comp = player4.getComponent(PlayerComponent.class);
+        player4Comp.playerNum = 4;
     }
 
     private void playHitAnimation(Entity bat) {
@@ -410,17 +428,27 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
             System.out.println(key.startsWith("W"));
 
             if (connection.getConnectionNum() == 1) {
-                playerEntity = player1Bat;
+                playerEntity = player1Comp;
                 currentKeyMap = firstPlayerKeyMap;
                 System.out.println("CONNECTION 1 DETECTED");
             }
             else if (connection.getConnectionNum() == 2) {
-                playerEntity = player2Bat;
+                playerEntity = player2Comp;
                 currentKeyMap = secondPlayerKeyMap;
                 System.out.println("CONNECTION 2 DETECTED");
             }
+            else if (connection.getConnectionNum() == 3) {
+                playerEntity = player3Comp;
+                currentKeyMap = thirdPlayerKeyMap;
+                System.out.println("CONNECTION 3 DETECTED");
+            }
+            else if (connection.getConnectionNum() == 4) {
+                playerEntity = player4Comp;
+                currentKeyMap = fourthPlayerKeyMap;
+                System.out.println("CONNECTION 4 DETECTED");
+            }
             else {
-                playerEntity = player1Bat;
+                playerEntity = player1Comp;
             }
 
             if (key.endsWith("_DOWN")) {
@@ -444,6 +472,11 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
                     playerEntity.right();
                     System.out.println("COMMAND TO MOVE RIGHT");
                 }
+                if (key.substring(0,1).equals("F")) {
+                    currentKeyMap.put("F",1);
+                    playerEntity.placeBomb();
+                    System.out.println("COMMAND TO PLACE BOMB");
+                }
                 //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
             }
             if (key.endsWith("_UP")) {
@@ -460,18 +493,24 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
                 System.out.println("UPDATED 1 PLAYER KEYMAP");
             }
             else if (connection.getConnectionNum() == 2) {
-                playerEntity = player2Bat;
-                currentKeyMap = secondPlayerKeyMap;
+                updateKeyMap(secondPlayerKeyMap, currentKeyMap);
                 System.out.println("UPDATED 2 PLAYER KEYMAP");
             }
-            else {playerEntity = player1Bat;}
+            else if (connection.getConnectionNum() == 3) {
+                updateKeyMap(thirdPlayerKeyMap, currentKeyMap);
+                System.out.println("UPDATED 3 PLAYER KEYMAP");
+            }
+            else if (connection.getConnectionNum() == 4) {
+                updateKeyMap(fourthPlayerKeyMap, currentKeyMap);
+                System.out.println("UPDATED 4 PLAYER KEYMAP");
+            }
+            else {playerEntity = player1Comp;}
 
             if (key.equals("CLOSED"))
             {
                 System.out.println("Client Closed");
             }
 
-            System.out.printf("First Player Key Map: " + firstPlayerKeyMap);
         });
     }
 
