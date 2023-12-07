@@ -55,23 +55,11 @@ public class BombermanFactory implements EntityFactory {
     public Entity newBomb(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
         physics.setBodyType(BodyType.DYNAMIC);
-        physics.setFixtureDef(new FixtureDef().density(0.3f).restitution(1.0f));
-        physics.setOnPhysicsInitialized(() -> physics.setLinearVelocity(5 * 60, -5 * 60));
+
 
         var endGame = getip("player1score").isEqualTo(10).or(getip("player2score").isEqualTo(10));
 
         ParticleEmitter emitter = ParticleEmitters.newFireEmitter();
-        emitter.startColorProperty().bind(
-                Bindings.when(endGame)
-                        .then(Color.LIGHTYELLOW)
-                        .otherwise(Color.LIGHTYELLOW)
-        );
-
-        emitter.endColorProperty().bind(
-                Bindings.when(endGame)
-                        .then(Color.RED)
-                        .otherwise(Color.LIGHTBLUE)
-        );
 
         emitter.setBlendMode(BlendMode.SRC_OVER);
         emitter.setSize(5, 10);
@@ -81,9 +69,9 @@ public class BombermanFactory implements EntityFactory {
                 .type(EntityType.BOMB)
                 .bbox(new HitBox(BoundingShape.circle(5)))
                 .with(physics)
-                .with(new CollidableComponent(true))
+                .with(new CollidableComponent(false))
                 .with(new ParticleComponent(emitter))
-                .with(new PlayerComponent())
+                .with(new BombComponent(data.get("radius")))
                 .build();
     }
 
@@ -99,6 +87,20 @@ public class BombermanFactory implements EntityFactory {
                 .with(new CollidableComponent(true))
                 .with(physics)
                 .with(new PlayerComponent())
+                .build();
+    }
+
+    @Spawns("powerup")
+    public Entity newPowerup(SpawnData data) {
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.setBodyType(BodyType.STATIC);
+
+        return entityBuilder(data)
+                .type(EntityType.POWERUP)
+                .viewWithBBox(new Rectangle(20,20, Color.GREEN))
+                .with(new CollidableComponent(true))
+                .with(physics)
+                .with(new PowerUpComponent())
                 .build();
     }
 }

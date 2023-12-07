@@ -24,6 +24,7 @@ public class LevelFactory implements EntityFactory {
     @Spawns("2")
     public Entity newBrick(SpawnData data){
         return entityBuilder(data)
+                .type(EntityType.BRICK)
                 .viewWithBBox(new Rectangle(BLOCK_SIZE,BLOCK_SIZE, Color.BROWN))
                 .with(new PhysicsComponent())
                 .build();

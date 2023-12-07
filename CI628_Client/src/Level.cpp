@@ -45,12 +45,13 @@ void Level::drawMap(SDL_Renderer* renderer)
 			switch (mapTileType)
 			{
 			case 0:
-				
-				TextureManager::Draw(renderer, empty, dest);
 				break;
 			case 1:
 				/*TextureManager::Draw(wall, src, dest);*/
 				TextureManager::Draw(renderer, wall, dest);
+				break;
+			case 2:
+				TextureManager::Draw(renderer, brick, dest);
 				break;
 			default:
 				break;

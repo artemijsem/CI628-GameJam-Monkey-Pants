@@ -88,7 +88,7 @@ public class PlayerComponent extends Component {
 
         bombsPlaced++;
 
-        Entity bomb = spawn("Bomb", new SpawnData(this.getEntity().getX(), this.getEntity().getY()).put("radius", bombRadius));
+        Entity bomb = spawn("bomb", new SpawnData(this.getEntity().getX(), this.getEntity().getY()).put("radius", bombRadius));
 
         getGameTimer().runOnceAfter(() -> {
             bomb.getComponent(BombComponent.class).explode();

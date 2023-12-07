@@ -18,6 +18,10 @@ static struct GameData {
     int player1X = 0;
     int player2Y = 0;
     int player2X = 0;
+    int player3Y = 0;
+    int player3X = 0;
+    int player4Y = 0;
+    int player4X = 0;
     int playerSize;
     int playerNum;
     int gameTime; 
@@ -28,14 +32,18 @@ class MyGame {
     private:
         SDL_Rect player1 = { 0, 0, 40, 40 };
         SDL_Rect player2 = { 600, 300, 40, 40 };
+        SDL_Rect player3 = { 0,0,0,0 };
+        SDL_Rect player4 = { 0,0,0,0 };
         SDL_Rect bomb_arr[50];
         SDL_Rect bomb_explosion_arr[500];
         SDL_Window* gameWindow = nullptr;
 
     public:
         Level* level = nullptr;
-        SDL_Texture* monkeyText;
-        SDL_Texture* pantsText;
+        SDL_Texture* playerOneText;
+        SDL_Texture* playerTwoText;
+        SDL_Texture* playerThreeText;
+        SDL_Texture* playerFourText;
         SDL_Texture* bombText;
         SDL_Texture* explosionText;
         std::vector<std::string> messages;
@@ -47,8 +55,8 @@ class MyGame {
         SDL_Rect textRect; 
         int textW, textH; 
 
-        bool monkeyWin = false;
-        bool pantsWin = false;
+        bool playerWin = false;
+        bool playerLose = false;
         bool pauseMenu = false;
         bool gameIsOver = false;
        
@@ -59,6 +67,8 @@ class MyGame {
         void input(SDL_Event& event);
         SDL_Rect getPlayerOneRect() { return player1; }
         SDL_Rect getPlayerTwoRect() { return player2; }
+        SDL_Rect getPlayerThreeRect() { return player3; }
+        SDL_Rect getPlayerFourRect() { return player4; }
         void update();
         void render(SDL_Renderer* renderer);
         void drawUI(SDL_Renderer* renderer);

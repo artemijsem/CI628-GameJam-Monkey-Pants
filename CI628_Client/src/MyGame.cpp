@@ -15,6 +15,10 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
         player1.w = game_data.playerSize; 
         player2.h = game_data.playerSize; 
         player2.w = game_data.playerSize;
+        player3.h = game_data.playerSize;
+        player3.w = game_data.playerSize;
+        player4.h = game_data.playerSize;
+        player4.w = game_data.playerSize;
         
         std::cout << "Player: " << game_data.playerNum << std::endl;
         std::cout << cmd << std::endl;
@@ -24,11 +28,15 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
 
     if (cmd == "GAME_DATA") {
         // we should have exactly 6 arguments
-        if (args.size() == 4) {
+        if (args.size() == 8) {
             game_data.player1Y = stoi(args.at(0));
             game_data.player1X = stoi(args.at(1));
             game_data.player2Y = stoi(args.at(2));
             game_data.player2X = stoi(args.at(3));
+            game_data.player3Y = stoi(args.at(4));
+            game_data.player3X = stoi(args.at(5));
+            game_data.player4Y = stoi(args.at(6));
+            game_data.player4X = stoi(args.at(7));
             //game_data.ballX = stoi(args.at(4));
             //game_data.ballY = stoi(args.at(5));
 
@@ -39,15 +47,6 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
 
     }
 
-     else if (cmd == "BAT1_HIT_BAT2") {
-        
-        monkeyWin = true;
-     }
-
-     else if (cmd == "GAME_TIME_OVER")
-    {
-        pantsWin = true;
-    }
 
      else if (cmd == "TIMER") {
         game_data.gameTime = stoi(args.at(0));
@@ -82,7 +81,7 @@ void MyGame::input(SDL_Event& event) {
             send(event.type == SDL_KEYDOWN ? "D_DOWN" : "D_UP");
             break;
         case SDLK_SPACE:
-            send(event.type == SDL_KEYDOWN ? "SPACE_DOWN" : "SPACE_UP");
+            send(event.type == SDL_KEYDOWN ? "F_DOWN" : "F_UP");
             break;
         case SDLK_ESCAPE:
             pauseMenu = true;
@@ -102,6 +101,10 @@ void MyGame::update() {
     player1.x = game_data.player1X;
     player2.y = game_data.player2Y;
     player2.x = game_data.player2X;
+    player3.y = game_data.player3Y;
+    player3.x = game_data.player3X;
+    player4.y = game_data.player4Y;
+    player4.x = game_data.player4X;
 
 }
 
@@ -114,16 +117,16 @@ void MyGame::gameOver(SDL_Renderer* renderer)
     
 
 
-    if (monkeyWin)
-    {
-        SDL_BlitSurface(monkeyWinImage, NULL, mainGameSurface, NULL);
-    }
+    //if (monkeyWin)
+    //{
+    //    SDL_BlitSurface(monkeyWinImage, NULL, mainGameSurface, NULL);
+    //}
 
-    if (pantsWin)
-    {
-        SDL_BlitSurface(pantsWinImage, NULL, mainGameSurface, NULL);
-    }
-    
+    //if (pantsWin)
+    //{
+    //    SDL_BlitSurface(pantsWinImage, NULL, mainGameSurface, NULL);
+    //}
+    //
 
 
 
@@ -131,7 +134,7 @@ void MyGame::gameOver(SDL_Renderer* renderer)
     SDL_UpdateWindowSurface(gameWindow);
     SDL_Delay(5000);
     
-    if (monkeyWin)
+  /*  if (monkeyWin)
     {
         SDL_FreeSurface(monkeyWinImage);
     }
@@ -139,7 +142,7 @@ void MyGame::gameOver(SDL_Renderer* renderer)
     if (pantsWin)
     {
         SDL_FreeSurface(pantsWinImage);
-    }
+    }*/
 
     gameIsOver = true;
 
@@ -150,9 +153,12 @@ void MyGame::init(SDL_Renderer* renderer)
 {
     level = new Level(renderer);
     level->wall = TextureManager::LoadTexture("../assets/images/wall.png", renderer);
-    level->empty = TextureManager::LoadTexture("../assets/images/ground.png", renderer);
-    monkeyText = TextureManager::LoadTexture("../assets/images/Monkey_Char.png", renderer);
-    pantsText = TextureManager::LoadTexture("../assets/images/Pants_Char.png", renderer);
+    level->brick = TextureManager::LoadTexture("../assets/images/brick.png", renderer);
+    level->bomb = TextureManager::LoadTexture("../assets/images/bomb.png", renderer);
+    playerOneText = TextureManager::LoadTexture("../assets/images/Player_One.png", renderer);
+    playerTwoText = TextureManager::LoadTexture("../assets/images/Player_Two.png", renderer);
+    playerThreeText = TextureManager::LoadTexture("../assets/images/Player_Three.png", renderer);
+    playerFourText = TextureManager::LoadTexture("../assets/images/Player_Four.png", renderer);
     TTF_Init();
 
     font = TTF_OpenFont("../assets/fonts/arial.ttf", 72);
@@ -168,13 +174,15 @@ void MyGame::render(SDL_Renderer* renderer) {
     level->drawMap(renderer);
 
 
-    TextureManager::Draw(renderer, monkeyText, getPlayerOneRect());
-    TextureManager::Draw(renderer, pantsText, getPlayerTwoRect());
+    TextureManager::Draw(renderer, playerOneText, getPlayerOneRect());
+    TextureManager::Draw(renderer, playerTwoText, getPlayerTwoRect());
+    TextureManager::Draw(renderer, playerThreeText, getPlayerThreeRect());
+    TextureManager::Draw(renderer, playerFourText, getPlayerFourRect());
 
     drawUI(renderer);
 
-    if (monkeyWin) { gameOver(renderer); }
-    if (pantsWin) { gameOver(renderer); }
+    //if (monkeyWin) { gameOver(renderer); }
+    //if (pantsWin) { gameOver(renderer); }
     /*DrawCircle(renderer, game_data.ballX, game_data.ballY, 5);*/
 }
 

@@ -338,6 +338,30 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
             }
         };
 
+        CollisionHandler powerupPlayerHandler = new CollisionHandler(EntityType.POWERUP, EntityType.PLAYER) {
+            @Override
+            protected void onCollisionBegin(Entity powerup, Entity player) {
+                switch (player.getComponent(PlayerComponent.class).playerNum)
+                {
+                    case 1:
+                        server.broadcast(POWERUP_PLAYER_ONE);
+                        break;
+                    case 2:
+                        server.broadcast(POWERUP_PLAYER_TWO);
+                        break;
+                    case 3:
+                        server.broadcast(POWERUP_PLAYER_THR);
+                        break;
+                    case 4:
+                        server.broadcast(POWERUP_PLAYER_FOR);
+                        break;
+                }
+
+                powerup.getComponent(PowerUpComponent.class).givePower(player);
+                powerup.removeFromWorld();
+            }
+        };
+
 
         getPhysicsWorld().addCollisionHandler(bombPlayerHandler);
 
@@ -358,8 +382,9 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     protected void onUpdate(double tpf) {
         if (!server.getConnections().isEmpty()) {
             var message = "GAME_DATA," + player1.getY() + "," + player1.getX() + "," +
-                    player2.getY() + "," + player2.getX();
-                        server.broadcast(message);
+                    player2.getY() + "," + player2.getX() + "," + player3.getY() + "," + player3.getX()
+                    + "," + player4.getY() + "," + player4.getX();
+                    server.broadcast(message);
         }
     }
 
@@ -368,11 +393,13 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         int cellX = (int)((brick.getX() + 20) / TILE_SIZE);
         int cellY = (int)((brick.getY() + 20) / TILE_SIZE);
 
-
+        getGameWorld().removeEntity(brick);
 
         if (FXGLMath.randomBoolean()) {
-            spawn("Powerup", cellX * 40, cellY * 40);
+            spawn("powerup", cellX * 40, cellY * 40);
         }
+
+
     }
 
     public void onPlayerDamaged(Entity player)
@@ -392,10 +419,10 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
     private void initGameObjects() {
 
-        player1 = spawn("player", new SpawnData(getAppWidth() / 4, getAppHeight() / 4));
-        player2 = spawn("player", new SpawnData((getAppWidth() / 4 ) * 3, getAppHeight() / 4));
-        player3 = spawn("player", new SpawnData(getAppWidth() / 4, (getAppHeight() / 4) * 3));
-        player4 = spawn("player", new SpawnData((getAppWidth() / 4) * 3, (getAppHeight() / 4) * 3));
+        player1 = spawn("player", new SpawnData(65, 95));
+        player2 = spawn("player", new SpawnData(725, 95));
+        player3 = spawn("player", new SpawnData(65, 505));
+        player4 = spawn("player", new SpawnData(725, 505));
 
         player1Comp = player1.getComponent(PlayerComponent.class);
         player1Comp.playerNum = 1;
