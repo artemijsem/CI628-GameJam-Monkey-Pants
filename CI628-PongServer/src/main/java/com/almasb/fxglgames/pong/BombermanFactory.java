@@ -54,10 +54,7 @@ public class BombermanFactory implements EntityFactory {
     @Spawns("bomb")
     public Entity newBomb(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
-        physics.setBodyType(BodyType.DYNAMIC);
-
-
-        var endGame = getip("player1score").isEqualTo(10).or(getip("player2score").isEqualTo(10));
+        physics.setBodyType(BodyType.STATIC);
 
         ParticleEmitter emitter = ParticleEmitters.newFireEmitter();
 
@@ -67,9 +64,7 @@ public class BombermanFactory implements EntityFactory {
 
         return entityBuilder(data)
                 .type(EntityType.BOMB)
-                .bbox(new HitBox(BoundingShape.circle(5)))
                 .with(physics)
-                .with(new CollidableComponent(false))
                 .with(new ParticleComponent(emitter))
                 .with(new BombComponent(data.get("radius")))
                 .build();
@@ -93,7 +88,7 @@ public class BombermanFactory implements EntityFactory {
     @Spawns("powerup")
     public Entity newPowerup(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
-        physics.setBodyType(BodyType.STATIC);
+        physics.setBodyType(BodyType.DYNAMIC);
 
         return entityBuilder(data)
                 .type(EntityType.POWERUP)

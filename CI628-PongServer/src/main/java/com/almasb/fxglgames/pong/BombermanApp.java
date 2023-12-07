@@ -78,10 +78,7 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     }
 
     private Entity player1, player2, player3, player4;
-
-    private Entity ball;
     private PlayerComponent player1Comp, player2Comp, player3Comp, player4Comp;
-
 
     public int gameTime = 30;
     public int maxGameTime = 0;
@@ -126,6 +123,8 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     HashMap<String, Integer> currentKeyMap = new HashMap<>();
 
     private Server<String> server;
+
+    Server<String> getServer() { return server; };
 
 /*    @Override
     protected void initInput() {
@@ -228,8 +227,10 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
     @Override
     protected void initGameVars(Map<String, Object> vars) {
-        vars.put("player1score", 0);
-        vars.put("player2score", 0);
+        vars.put("player1lives", 3);
+        vars.put("player2lives", 3);
+        vars.put("player3lives", 3);
+        vars.put("player4lives", 3);
         vars.put("numOfConnections", 0);
     }
 
@@ -314,8 +315,6 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     protected void initPhysics() {
         getPhysicsWorld().setGravity(0, 0);
 
-
-
         CollisionHandler bombPlayerHandler = new CollisionHandler(EntityType.BOMB, EntityType.PLAYER) {
             @Override
             protected void onCollisionBegin(Entity bomb, Entity player) {
@@ -358,12 +357,12 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
                 }
 
                 powerup.getComponent(PowerUpComponent.class).givePower(player);
-                powerup.removeFromWorld();
+                getGameWorld().removeEntity(powerup);
             }
         };
 
 
-        getPhysicsWorld().addCollisionHandler(bombPlayerHandler);
+        getPhysicsWorld().addCollisionHandler(powerupPlayerHandler);
 
     }
 
@@ -372,10 +371,10 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         MainUIController controller = new MainUIController();
         UI ui = getAssetLoader().loadUI("main.fxml", controller);
 
-        controller.getLabelScorePlayer().textProperty().bind(getip("player1score").asString());
-        controller.getLabelScoreEnemy().textProperty().bind(getip("player2score").asString());
+        controller.getLabelPlayerOneLive().textProperty().bind(getip("player1lives").asString());
+        controller.getLabelScoreEnemy().textProperty().bind(getip("player2lives").asString());
 
-        getGameScene().addUI(ui);
+
     }
 
     @Override
@@ -386,17 +385,23 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
                     + "," + player4.getY() + "," + player4.getX();
                     server.broadcast(message);
         }
+
+        Text playerOneText = geto("playerOneLivesText");
+        playerOneText.setText("" + player1Comp.getLives());
+
     }
 
     public void onBrickDestroyed(Entity brick)
     {
-        int cellX = (int)((brick.getX() + 20) / TILE_SIZE);
-        int cellY = (int)((brick.getY() + 20) / TILE_SIZE);
-
+        int cellX = (int)brick.getX();
+        int cellY = (int)brick.getY();
+        server.broadcast("BRICK_DESTROYED," + cellX + "," + cellY);
         getGameWorld().removeEntity(brick);
 
-        if (FXGLMath.randomBoolean()) {
-            spawn("powerup", cellX * 40, cellY * 40);
+        // 40% chance to spawn powerup
+        if (FXGLMath.random(0,10) > 6) {
+            spawn("powerup", cellX, cellY );
+            server.broadcast("POWERUP_SPAWN," + cellX + "," + cellY);
         }
 
 
@@ -405,6 +410,11 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     public void onPlayerDamaged(Entity player)
     {
         player.getComponent(PlayerComponent.class).lives--;
+        if(player.getComponent(PlayerComponent.class).getLives() <= 0)
+        {
+            getGameWorld().removeEntity(player);
+            server.broadcast("PLAYER_LOST," + player.getComponent(PlayerComponent.class).getPlayerNum());
+        }
     }
 
 

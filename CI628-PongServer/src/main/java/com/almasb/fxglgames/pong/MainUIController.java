@@ -42,9 +42,11 @@ import javafx.util.Duration;
 public class MainUIController implements UIController {
 
     @FXML
-    private Label labelScorePlayer;
+    private Label labelPlayerOneLive;
 
     private Text gameTime = new Text("0");
+
+    private Text playerOneLives = new Text("0");
     @FXML
     private Label labelScoreEnemy;
 
@@ -52,13 +54,12 @@ public class MainUIController implements UIController {
         return labelScoreEnemy;
     }
 
-    public Label getLabelScorePlayer() {
-        return labelScorePlayer;
+    public Label getLabelPlayerOneLive() {
+        return labelPlayerOneLive;
     }
 
     @Override
     public void init() {
-        labelScorePlayer.setFont(FXGL.getUIFactoryService().newFont(72));
         labelScoreEnemy.setFont(FXGL.getUIFactoryService().newFont(72));
 
         labelScoreEnemy.layoutBoundsProperty().addListener((observable, oldValue, newBounds) -> {
@@ -66,18 +67,17 @@ public class MainUIController implements UIController {
             labelScoreEnemy.setTranslateX(800 - 100 - width);
         });
 
-        labelScorePlayer.textProperty().addListener((observable, oldValue, newValue) -> {
-            animateLabel(labelScorePlayer);
-        });
 
-        labelScoreEnemy.textProperty().addListener((observable, oldValue, newValue) -> {
-            animateLabel(labelScoreEnemy);
-        });
 
         FXGL.addUINode(gameTime, 400, 200);
         gameTime.setFill(Color.RED);
         FXGL.set("gameTimerText", gameTime);
         gameTime.setFont(Font.font(72));
+
+        FXGL.addUINode(playerOneLives, 100, 100);
+        playerOneLives.setFill(Color.WHITE);
+        FXGL.set("playerOneLivesText", playerOneLives);
+        playerOneLives.setFont(Font.font(72));
 
     }
 

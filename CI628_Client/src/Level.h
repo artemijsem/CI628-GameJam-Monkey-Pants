@@ -5,6 +5,7 @@
 
 const int NUM_ROWS = 18;
 const int NUM_COLS = 26;
+const int MAP_TILE_SIZE = 30;
 
 class Level
 {
@@ -17,6 +18,8 @@ public:
 
 	void drawMap(SDL_Renderer* renderer);
 	void createLevelFromString(std::string level);
+	void updateMap(int sentX, int sentY, int newTileType);
+	void bombExplosion(int bombX, int bombY, int bombRadius);
 	
 	SDL_Rect src;
 	SDL_Rect dest;
@@ -24,4 +27,5 @@ public:
 	SDL_Texture* wall;
 	SDL_Texture* brick;
 	SDL_Texture* bomb;
+	SDL_Texture* bombExplosionWave;
 };

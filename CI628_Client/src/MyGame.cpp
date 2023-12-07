@@ -48,14 +48,28 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     }
 
 
-     else if (cmd == "TIMER") {
-        game_data.gameTime = stoi(args.at(0));
+    else if (cmd == "TIMER") {
+       game_data.gameTime = stoi(args.at(0));
     }
 
-     else if (cmd == "SPAWN_BOMB")
+    else if (cmd == "SPAWN_BOMB")
     {
-
+        std::cout << "SPAWN BOMB: " << cmd << " " << args.at(0) << " " << args.at(1) << std::endl;
+        level->updateMap(stoi(args.at(0)), stoi(args.at(1)), 3);
+        
     }
+
+    else if (cmd == "BRICK_DESTROYED")
+    {
+        // make the map tile with brick to become clear (0)
+        level->updateMap(stoi(args.at(0)), stoi(args.at(1)), 0);
+    }
+
+    else if (cmd == "BOMB_EXPLODED")
+    {
+        level->bombExplosion((stoi(args.at(0)), stoi(args.at(1)), stoi(args.at(2)));
+    }
+
     
     else {
         std::cout << "Received: " << cmd << std::endl;
@@ -155,6 +169,7 @@ void MyGame::init(SDL_Renderer* renderer)
     level->wall = TextureManager::LoadTexture("../assets/images/wall.png", renderer);
     level->brick = TextureManager::LoadTexture("../assets/images/brick.png", renderer);
     level->bomb = TextureManager::LoadTexture("../assets/images/bomb.png", renderer);
+    level->bombExplosionWave = TextureManager::LoadTexture("../assets/images/bombExplosion.png", renderer);
     playerOneText = TextureManager::LoadTexture("../assets/images/Player_One.png", renderer);
     playerTwoText = TextureManager::LoadTexture("../assets/images/Player_Two.png", renderer);
     playerThreeText = TextureManager::LoadTexture("../assets/images/Player_Three.png", renderer);
@@ -213,3 +228,4 @@ void MyGame::quitGame() {
     TTF_CloseFont(smallFont); 
     TTF_Quit();
 }
+

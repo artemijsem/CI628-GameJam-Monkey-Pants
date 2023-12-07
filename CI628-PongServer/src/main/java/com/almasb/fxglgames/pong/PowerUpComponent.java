@@ -10,7 +10,7 @@ public class PowerUpComponent extends Component {
 
     public void givePower(Entity player)
     {
-        player.getComponent(PlayerComponent.class).bombRadius++;
+        player.getComponent(PlayerComponent.class).bombRadius += 5;
     }
 
 }

@@ -26,9 +26,11 @@
 
 package com.almasb.fxglgames.pong;
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.entity.components.BoundingBoxComponent;
+import com.almasb.fxglgames.pong.BombermanApp;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 import static java.lang.Math.abs;
@@ -47,18 +49,23 @@ public class BombComponent extends Component {
         this.radius = radius;
     }
 
+
+
     public void explode()
     {
-        BoundingBoxComponent bbox = entity.getBoundingBoxComponent();
 
+        BoundingBoxComponent bbox = entity.getBoundingBoxComponent();
         // Destroy bricks
         getGameWorld()
                 .getEntitiesInRange(bbox.range(radius, radius))
                 .stream()
                 .filter(e -> e.isType(EntityType.BRICK))
                 .forEach(e -> {
-                    FXGL.<BombermanApp>getAppCast().onBrickDestroyed(e);
-                    e.removeFromWorld();
+                    if( Math.abs( e.getX() - bbox.getEntity().getX()) < 20 || Math.abs(e.getY() - bbox.getEntity().getY()) < 20)
+                    {
+                        FXGL.<BombermanApp>getAppCast().onBrickDestroyed(e);
+                        e.removeFromWorld();
+                    }
                 });
 
         // Damage players
@@ -67,10 +74,13 @@ public class BombComponent extends Component {
                 .stream()
                 .filter(e -> e.isType(EntityType.PLAYER))
                 .forEach(e -> {
-                    FXGL.<BombermanApp>getAppCast().onPlayerDamaged(e);
+                    if( Math.abs( e.getX() - bbox.getEntity().getX()) < 20 || Math.abs(e.getY() - bbox.getEntity().getY()) < 20)
+                    {
+                        FXGL.<BombermanApp>getAppCast().onPlayerDamaged(e);
+                    }
                 });
-
-
+        FXGL.<BombermanApp>getAppCast().getServer().broadcast("BOMB_EXPLODED," + bbox.getEntity().getX() + "," + bbox.getEntity().getY() + "," + radius);
+        System.out.println("PLAYER_BOMB_RADIUS NOW: " + radius);
         entity.removeFromWorld();
     }
 

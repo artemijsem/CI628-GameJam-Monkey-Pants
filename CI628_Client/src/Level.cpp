@@ -2,6 +2,7 @@
 #include "MyGame.h"
 #include "TextureManager.h"
 #include<string>
+#include <cmath>
 
 
 
@@ -30,17 +31,16 @@ void Level::createLevelFromString(std::string level)
 void Level::drawMap(SDL_Renderer* renderer)
 {
 	int mapTileType = 0;
-	int mapTileSize = 30;
 
 	for (int row = 0; row < NUM_ROWS; row++)
 	{
 		for (int col = 0; col < NUM_COLS; col++)
 		{
 			mapTileType = map[row][col];
-			dest.x = col * mapTileSize;
-			dest.y = row * mapTileSize;
-			dest.w = mapTileSize;
-			dest.h = mapTileSize;
+			dest.x = col * MAP_TILE_SIZE;
+			dest.y = row * MAP_TILE_SIZE;
+			dest.w = MAP_TILE_SIZE;
+			dest.h = MAP_TILE_SIZE;
 
 			switch (mapTileType)
 			{
@@ -53,9 +53,55 @@ void Level::drawMap(SDL_Renderer* renderer)
 			case 2:
 				TextureManager::Draw(renderer, brick, dest);
 				break;
+			case 3:
+				TextureManager::Draw(renderer, bomb, dest);
+				break;
 			default:
 				break;
 			}
 		}
 	}
+}
+
+void Level::updateMap(int sentX, int sentY, int newTileType)
+{
+	for (int row = 0; row < NUM_ROWS; row++)
+	{
+		for (int col = 0; col < NUM_COLS; col++)
+		{
+			// If updating existing tiles
+			if (sentX == col * MAP_TILE_SIZE && sentY == row * MAP_TILE_SIZE) map[row][col] = newTileType;
+
+			// If creating a new tile
+			else
+			{
+				map[sentY / MAP_TILE_SIZE][sentX / MAP_TILE_SIZE] = newTileType;
+			}
+			
+		}
+	}
+}
+
+
+
+void Level::bombExplosion(int bombX, int bombY, int bombRadius)
+{
+	int bombPosX = bombX / MAP_TILE_SIZE;
+	int bombPosY = bombY / MAP_TILE_SIZE;
+
+	// Clear out bomb texture
+	map[bombPosY][bombPosX] = 0;
+
+	for (int explosionCircle = 0; explosionCircle < bombRadius; explosionCircle++)
+	{
+		for (int row = 0; row < NUM_ROWS; row++)
+		{
+			for (int col = 0; col < NUM_COLS; col++)
+			{
+				
+
+			}
+		}
+	}
+
 }

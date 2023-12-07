@@ -54,7 +54,7 @@ public class PlayerComponent extends Component {
     public int maxBombs = 1;
 
     public int bombsPlaced = 0;
-    public int bombRadius = BombermanApp.TILE_SIZE;
+    public int bombRadius = 30;
 
     public void up() {
  /*       if (entity.getY() >= BAT_SPEED / 60)*/
@@ -89,10 +89,15 @@ public class PlayerComponent extends Component {
         bombsPlaced++;
 
         Entity bomb = spawn("bomb", new SpawnData(this.getEntity().getX(), this.getEntity().getY()).put("radius", bombRadius));
+        FXGL.<BombermanApp>getAppCast().getServer().broadcast("SPAWN_BOMB," + this.getEntity().getX() + "," + this.getEntity().getY());
 
         getGameTimer().runOnceAfter(() -> {
             bomb.getComponent(BombComponent.class).explode();
             bombsPlaced--;
         }, Duration.seconds(2));
     }
+
+    public int getLives() {return lives;}
+
+    public int getPlayerNum() {return playerNum;}
 }
