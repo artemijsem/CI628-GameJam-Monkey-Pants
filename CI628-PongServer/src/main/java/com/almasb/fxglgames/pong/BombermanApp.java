@@ -244,13 +244,13 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
             if (connection.getConnectionNum() == 1) {
-                connection.send("SETUP,1," + player1Comp.getEntity().getHeight()+ "," + gameTime);
+                connection.send("SETUP,1," + player1Comp.getEntity().getHeight());
             } else if (connection.getConnectionNum() == 2) {
-                connection.send("SETUP,2," + player2Comp.getEntity().getHeight() + "," + gameTime);
+                connection.send("SETUP,2," + player2Comp.getEntity().getHeight());
             } else if (connection.getConnectionNum() == 3) {
-                connection.send("SETUP,3," + player3Comp.getEntity().getHeight() + "," + gameTime);
+                connection.send("SETUP,3," + player3Comp.getEntity().getHeight());
             } else if (connection.getConnectionNum() == 4) {
-                connection.send("SETUP,4," + player4Comp.getEntity().getHeight() + "," + gameTime);
+                connection.send("SETUP,4," + player4Comp.getEntity().getHeight());
             }
             inc("numOfConnections", 1);
 
@@ -340,21 +340,8 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         CollisionHandler powerupPlayerHandler = new CollisionHandler(EntityType.POWERUP, EntityType.PLAYER) {
             @Override
             protected void onCollisionBegin(Entity powerup, Entity player) {
-                switch (player.getComponent(PlayerComponent.class).playerNum)
-                {
-                    case 1:
-                        server.broadcast(POWERUP_PLAYER_ONE);
-                        break;
-                    case 2:
-                        server.broadcast(POWERUP_PLAYER_TWO);
-                        break;
-                    case 3:
-                        server.broadcast(POWERUP_PLAYER_THR);
-                        break;
-                    case 4:
-                        server.broadcast(POWERUP_PLAYER_FOR);
-                        break;
-                }
+
+                server.broadcast("POWERUP_PICKED," + powerup.getX() + "," + powerup.getY());
 
                 powerup.getComponent(PowerUpComponent.class).givePower(player);
                 getGameWorld().removeEntity(powerup);
@@ -401,7 +388,7 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         // 40% chance to spawn powerup
         if (FXGLMath.random(0,10) > 6) {
             spawn("powerup", cellX, cellY );
-            server.broadcast("POWERUP_SPAWN," + cellX + "," + cellY);
+            server.broadcast("SPAWN_POWERUP," + cellX + "," + cellY);
         }
 
 
@@ -545,6 +532,7 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
             if (key.equals("CLOSED"))
             {
+                connection.terminate();
                 System.out.println("Client Closed");
             }
 

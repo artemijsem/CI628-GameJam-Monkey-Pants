@@ -59,6 +59,9 @@ void Level::drawMap(SDL_Renderer* renderer)
 			case 4:
 				TextureManager::Draw(renderer, bombExplosionWave, dest);
 				break;
+			case 5:
+				TextureManager::Draw(renderer, powerUp, dest);
+				break;
 			default:
 				break;
 			}

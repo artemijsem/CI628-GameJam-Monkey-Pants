@@ -24,7 +24,6 @@ static struct GameData {
     int player4X = 0;
     int playerSize;
     int playerNum;
-    int gameTime; 
 } game_data;
 
 class MyGame {
@@ -55,10 +54,10 @@ class MyGame {
         SDL_Rect textRect; 
         int textW, textH; 
 
-        bool playerWin = false;
-        bool playerLose = false;
-        bool pauseMenu = false;
-        bool gameIsOver = false;
+        bool playerOneAlive = true;
+        bool playerTwoAlive = true;
+        bool playerThrAlive = true;
+        bool playerForAlive = true;
        
 
         void on_receive(std::string message, std::vector<std::string>& args);

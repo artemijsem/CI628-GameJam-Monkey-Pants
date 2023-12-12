@@ -121,10 +121,7 @@ void loop(SDL_Renderer* renderer) {
 
         SDL_RenderPresent(renderer);
 
-        if (game->gameIsOver)
-        {
-            is_running = false;
-        }
+
 
         SDL_Delay(17);
         SDL_Time = now;
@@ -197,8 +194,11 @@ int main(int argc, char** argv) {
     run_game();
 
     game->quitGame();
+    game->send("CLOSED");
 
     delete game;
+
+    
 
     // Close connection to the server
     SDLNet_TCP_Close(socket);

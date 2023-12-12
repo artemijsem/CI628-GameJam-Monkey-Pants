@@ -8,7 +8,6 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
         std::cout << "Setup information recevied" << std::endl; 
         game_data.playerNum = stoi(args.at(0));
         game_data.playerSize = stoi(args.at(1)); 
-        game_data.gameTime = stoi(args.at(2)); 
         std::cout << "Player Size: " << game_data.playerSize << std::endl;
        
         player1.h = game_data.playerSize; 
@@ -20,8 +19,6 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
         player4.h = game_data.playerSize;
         player4.w = game_data.playerSize;
         
-        std::cout << "Player: " << game_data.playerNum << std::endl;
-        std::cout << cmd << std::endl;
 
         
     }
@@ -48,15 +45,23 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     }
 
 
-    else if (cmd == "TIMER") {
-       game_data.gameTime = stoi(args.at(0));
-    }
+
 
     else if (cmd == "SPAWN_BOMB")
     {
         std::cout << "SPAWN BOMB: " << cmd << " " << args.at(0) << " " << args.at(1) << std::endl;
         level->updateMap(stoi(args.at(0)), stoi(args.at(1)), 3);
         
+    }
+
+    else if (cmd == "SPAWN_POWERUP")
+    {
+        level->updateMap(stoi(args.at(0)), stoi(args.at(1)), 5);
+    }
+
+    else if (cmd == "POWERUP_PICKED")
+    {
+        level->updateMap(stoi(args.at(0)), stoi(args.at(1)), 0);
     }
 
     else if (cmd == "BRICK_DESTROYED")
@@ -69,6 +74,29 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     {
         level->bombExplosion(stoi(args.at(0)), stoi(args.at(1)), stoi(args.at(2)));
         std::cout << "BOMB_EXPLODED : " << cmd << " " << args.at(0) << " " << args.at(1) << " " << args.at(2) << std::endl;
+        
+        level->clearBombExplosion();
+    }
+
+    else if (cmd == "PLAYER_LOST")
+    {
+        switch (stoi(args.at(0)))
+        {
+        case 1:
+            playerOneAlive = false;
+            break;
+        case 2:
+            playerTwoAlive = false;
+            break;
+        case 3:
+            playerThrAlive = false;
+            break;
+        case 4:
+            playerForAlive = false;
+            break;
+        default:
+            break;
+        }
     }
 
     
@@ -98,8 +126,9 @@ void MyGame::input(SDL_Event& event) {
         case SDLK_SPACE:
             send(event.type == SDL_KEYDOWN ? "F_DOWN" : "F_UP");
             break;
-        case SDLK_ESCAPE:
-            pauseMenu = true;
+        case SDLK_z:
+
+            send("CLOSED");
             break;
     }
 
@@ -159,7 +188,7 @@ void MyGame::gameOver(SDL_Renderer* renderer)
         SDL_FreeSurface(pantsWinImage);
     }*/
 
-    gameIsOver = true;
+    
 
     
 }
@@ -172,6 +201,7 @@ void MyGame::init(SDL_Renderer* renderer)
     level->brick = TextureManager::LoadTexture("../assets/images/brick.png", renderer);
     level->bomb = TextureManager::LoadTexture("../assets/images/bomb.png", renderer);
     level->bombExplosionWave = TextureManager::LoadTexture("../assets/images/bombExplosion.png", renderer);
+    level->powerUp = TextureManager::LoadTexture("../assets/images/powerup.png", renderer);
     playerOneText = TextureManager::LoadTexture("../assets/images/Player_One.png", renderer);
     playerTwoText = TextureManager::LoadTexture("../assets/images/Player_Two.png", renderer);
     playerThreeText = TextureManager::LoadTexture("../assets/images/Player_Three.png", renderer);
@@ -192,14 +222,14 @@ void MyGame::render(SDL_Renderer* renderer) {
 
     level->drawMap(renderer);
 
-
-    TextureManager::Draw(renderer, playerOneText, getPlayerOneRect());
-    TextureManager::Draw(renderer, playerTwoText, getPlayerTwoRect());
-    TextureManager::Draw(renderer, playerThreeText, getPlayerThreeRect());
-    TextureManager::Draw(renderer, playerFourText, getPlayerFourRect());
+    if(playerOneAlive) TextureManager::Draw(renderer, playerOneText, getPlayerOneRect());
+    if(playerTwoAlive) TextureManager::Draw(renderer, playerTwoText, getPlayerTwoRect());
+    if(playerThrAlive) TextureManager::Draw(renderer, playerThreeText, getPlayerThreeRect());
+    if(playerForAlive) TextureManager::Draw(renderer, playerFourText, getPlayerFourRect());
 
     drawUI(renderer);
 
+    
     //if (monkeyWin) { gameOver(renderer); }
     //if (pantsWin) { gameOver(renderer); }
     /*DrawCircle(renderer, game_data.ballX, game_data.ballY, 5);*/
@@ -207,29 +237,30 @@ void MyGame::render(SDL_Renderer* renderer) {
 
 void MyGame::drawUI(SDL_Renderer* renderer) {
 
-    textSurface = TTF_RenderText_Solid(smallFont, "Game Time", textColor);
-    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
-    textRect = { 700 - textW/2, 50, textW, textH };
-    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+    //textSurface = TTF_RenderText_Solid(smallFont, "Game Time", textColor);
+    //textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    //SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    //textRect = { 700 - textW/2, 50, textW, textH };
+    //SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
 
-    SDL_FreeSurface(textSurface);
-    SDL_DestroyTexture(textTexture);
+    //SDL_FreeSurface(textSurface);
+    //SDL_DestroyTexture(textTexture);
 
-    //std::cout << "Drawing UI" << std::endl; 
-    textSurface = TTF_RenderText_Solid(font, std::to_string(game_data.gameTime).c_str(), textColor);
-    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH); 
-    textRect = { 675, 100, textW, textH };
-    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+    ////std::cout << "Drawing UI" << std::endl; 
+    //textSurface = TTF_RenderText_Solid(font, std::to_string(game_data.gameTime).c_str(), textColor);
+    //textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    //SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH); 
+    //textRect = { 675, 100, textW, textH };
+    //SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
 
-    SDL_FreeSurface(textSurface); 
-    SDL_DestroyTexture(textTexture); 
+    //SDL_FreeSurface(textSurface); 
+    //SDL_DestroyTexture(textTexture); 
 }
 
 void MyGame::quitGame() {
     TTF_CloseFont(font); 
     TTF_CloseFont(smallFont); 
     TTF_Quit();
+    
 }
 
