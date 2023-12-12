@@ -71,6 +71,7 @@ class MyGame {
         SDL_Rect getPlayerFourRect() { return player4; }
         void update();
         void render(SDL_Renderer* renderer);
+        SDL_Renderer* getGameRenderer();
         void drawUI(SDL_Renderer* renderer);
         void gameOver(SDL_Renderer* renderer);
         void quitGame(); 

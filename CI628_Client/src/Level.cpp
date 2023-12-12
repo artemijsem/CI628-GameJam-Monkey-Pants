@@ -3,14 +3,13 @@
 #include "TextureManager.h"
 #include<string>
 #include <cmath>
+#include <vector>
 
 
 
 
 Level::Level(SDL_Renderer* renderer)
 {
-	
-
     createLevelFromString(levelText);
 }
 
@@ -30,6 +29,7 @@ void Level::createLevelFromString(std::string level)
 
 void Level::drawMap(SDL_Renderer* renderer)
 {
+
 	int mapTileType = 0;
 
 	for (int row = 0; row < NUM_ROWS; row++)
@@ -56,6 +56,9 @@ void Level::drawMap(SDL_Renderer* renderer)
 			case 3:
 				TextureManager::Draw(renderer, bomb, dest);
 				break;
+			case 4:
+				TextureManager::Draw(renderer, bombExplosionWave, dest);
+				break;
 			default:
 				break;
 			}
@@ -76,6 +79,7 @@ void Level::updateMap(int sentX, int sentY, int newTileType)
 			else
 			{
 				map[sentY / MAP_TILE_SIZE][sentX / MAP_TILE_SIZE] = newTileType;
+				
 			}
 			
 		}
@@ -84,24 +88,61 @@ void Level::updateMap(int sentX, int sentY, int newTileType)
 
 
 
+
 void Level::bombExplosion(int bombX, int bombY, int bombRadius)
 {
+	// COnversion from absoulte X and Y pos to map array pos
 	int bombPosX = bombX / MAP_TILE_SIZE;
 	int bombPosY = bombY / MAP_TILE_SIZE;
+
+	previousTileType.clear();
+	previousTilePosX.clear();
+	previousTilePosY.clear();
 
 	// Clear out bomb texture
 	map[bombPosY][bombPosX] = 0;
 
-	for (int explosionCircle = 0; explosionCircle < bombRadius; explosionCircle++)
+	// Loop through tiles that are in the bomb radius
+	for (int explosionCircle = 0; explosionCircle <= (bombRadius / MAP_TILE_SIZE); explosionCircle++)
 	{
 		for (int row = 0; row < NUM_ROWS; row++)
 		{
 			for (int col = 0; col < NUM_COLS; col++)
 			{
-				
+				// Look for tiles that are on the same X and Y axis as the bomb
+				if (((abs(bombPosX - col) == 0 && abs(bombPosY - row) == explosionCircle) || (abs(bombPosY - row) == 0 && abs(bombPosX - col) == explosionCircle)) && map[row][col] != 1)
+				{
+					// Save tiles before the explosion
+					previousTileType.push_back(map[row][col]);
+					previousTilePosX.push_back(row);
+					previousTilePosY.push_back(col);
+
+					map[row][col] = 4;
+					
+
+				}
 
 			}
 		}
 	}
+	
 
+}
+
+void Level::clearBombExplosion()
+{
+	for (int row = 0; row < NUM_ROWS; row++)
+	{
+		for (int col = 0; col < NUM_COLS; col++)
+		{
+			for (unsigned int i = 0; i < previousTileType.size(); i++)
+			{
+				if (row == previousTilePosX[i] && col == previousTilePosY[i])
+				{
+					map[row][col] = previousTileType[i];
+				}
+			}
+
+		}
+	}
 }

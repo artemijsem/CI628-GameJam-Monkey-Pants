@@ -67,7 +67,8 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
 
     else if (cmd == "BOMB_EXPLODED")
     {
-        level->bombExplosion((stoi(args.at(0)), stoi(args.at(1)), stoi(args.at(2)));
+        level->bombExplosion(stoi(args.at(0)), stoi(args.at(1)), stoi(args.at(2)));
+        std::cout << "BOMB_EXPLODED : " << cmd << " " << args.at(0) << " " << args.at(1) << " " << args.at(2) << std::endl;
     }
 
     
@@ -166,6 +167,7 @@ void MyGame::gameOver(SDL_Renderer* renderer)
 void MyGame::init(SDL_Renderer* renderer)
 {
     level = new Level(renderer);
+    level->LevelTime = SDL_GetTicks();
     level->wall = TextureManager::LoadTexture("../assets/images/wall.png", renderer);
     level->brick = TextureManager::LoadTexture("../assets/images/brick.png", renderer);
     level->bomb = TextureManager::LoadTexture("../assets/images/bomb.png", renderer);
@@ -186,6 +188,8 @@ void MyGame::init(SDL_Renderer* renderer)
 
 // Comment
 void MyGame::render(SDL_Renderer* renderer) {
+
+
     level->drawMap(renderer);
 
 

@@ -11,6 +11,8 @@ using namespace std;
 const char* IP_NAME = "localhost";
 const Uint16 PORT = 55555;
 
+Uint32 SDL_Time = 0;
+
 bool is_running = true;
 
 MyGame* game = new MyGame();
@@ -82,8 +84,11 @@ static int on_send(void* socket_ptr) {
 
 void loop(SDL_Renderer* renderer) {
     SDL_Event event;
+    SDL_Time = SDL_GetTicks();
 
     while (is_running) {
+        unsigned now = SDL_GetTicks();
+        unsigned delta_time = now - SDL_Time;
         // input
         while (SDL_PollEvent(&event)) {
             if ((event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) && event.key.repeat == 0) {
@@ -122,12 +127,13 @@ void loop(SDL_Renderer* renderer) {
         }
 
         SDL_Delay(17);
+        SDL_Time = now;
     }
 }
 
 int run_game() {
     SDL_Window* window = SDL_CreateWindow(
-        "Multiplayer Pong Client",
+        "Multiplayer Bomberman Client",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         800, 600,
         SDL_WINDOW_SHOWN
