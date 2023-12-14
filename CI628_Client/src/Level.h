@@ -37,5 +37,5 @@ public:
 	SDL_Texture* bomb;
 	SDL_Texture* bombExplosionWave;
 	SDL_Texture* powerUp;
-	SDL_Renderer* LevelRenderer;
+	
 };

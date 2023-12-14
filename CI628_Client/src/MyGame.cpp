@@ -3,6 +3,9 @@
 #include "TextureManager.h"
 
 void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
+
+
+
     if (cmd == "SETUP")
     {
         std::cout << "Setup information recevied" << std::endl; 
@@ -18,6 +21,7 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
         player3.w = game_data.playerSize;
         player4.h = game_data.playerSize;
         player4.w = game_data.playerSize;
+        
         
 
         
@@ -75,7 +79,7 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
         level->bombExplosion(stoi(args.at(0)), stoi(args.at(1)), stoi(args.at(2)));
         std::cout << "BOMB_EXPLODED : " << cmd << " " << args.at(0) << " " << args.at(1) << " " << args.at(2) << std::endl;
         
-        level->clearBombExplosion();
+        
     }
 
     else if (cmd == "PLAYER_LOST")
@@ -227,6 +231,10 @@ void MyGame::render(SDL_Renderer* renderer) {
     if(playerThrAlive) TextureManager::Draw(renderer, playerThreeText, getPlayerThreeRect());
     if(playerForAlive) TextureManager::Draw(renderer, playerFourText, getPlayerFourRect());
 
+
+    level->clearBombExplosion();
+    
+    
     drawUI(renderer);
 
     

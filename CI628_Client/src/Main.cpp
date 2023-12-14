@@ -3,8 +3,10 @@
 #include<SDL_Image.h>
 #include<SDL_ttf.h>
 #include <SDL_mixer.h>
+#include <set>
 
 #include "MyGame.h"
+#include "Crypto.h"
 
 using namespace std;
 
@@ -17,6 +19,7 @@ bool is_running = true;
 
 MyGame* game = new MyGame();
 
+Crypto* crypto = new Crypto();
 
 static int on_receive(void* socket_ptr) {
     TCPsocket socket = (TCPsocket)socket_ptr;
@@ -29,9 +32,38 @@ static int on_receive(void* socket_ptr) {
     // TODO: while(), rather than do
     do {
         received = SDLNet_TCP_Recv(socket, message, message_length);
-        message[received] = '\0';
+        std::string messageString;
 
-        char* pch = strtok(message, ",");
+        //message = crypto->decoder(encodedMessageVector);
+        message[received] = '\0';
+        if (crypto->getKeyRecieved())
+        {
+
+            messageString = message;
+            std::cout << std::endl << std::endl << "MESSAGE STRING BEFORE:" << messageString << std::endl << typeid(messageString).name() << std::endl;
+            std::vector<int> encodedMessageVector;
+            std::vector<int> v(messageString.begin(), messageString.end());
+            int j = 0;
+            for (int i = 0; i < messageString.size(); i++)
+            {
+                v[j] = v[j] * 10 + (messageString[i] - 48);
+            }
+
+            for (auto val : v)
+            {
+                encodedMessageVector.push_back(val);
+            }
+
+
+            messageString = crypto->decoder(encodedMessageVector).c_str();
+            std::cout << std::endl << std:: endl << "MESSAGE STRING DONE:" << messageString << std::endl << std::endl;
+            encodedMessageVector.clear();
+        }
+
+        else { messageString = message; }
+
+
+        char* pch = strtok((char *)messageString.c_str(), ",");
 
         // get the command, which is the first string in the message
         string cmd(pch);
@@ -47,6 +79,17 @@ static int on_receive(void* socket_ptr) {
             }
         }
 
+        if (cmd == "START")
+        {
+            crypto->setPublicKey(stoi(args.at(0)));
+            crypto->setPrivateKey(stoi(args.at(1)));
+            crypto->setN(stoi(args.at(2)));
+            std::cout << "KEYS RECIEVED" << std::endl << "PUBLIC KEY: " << crypto->getPublicKey() << std::endl << "PRIVATE KEY: " << crypto->getPrivateKey() << std::endl;
+            crypto->setKeyRecieved(true);
+        }
+
+        
+        
         game->on_receive(cmd, args);
 
         if (cmd == "exit") {
@@ -186,6 +229,10 @@ int main(int argc, char** argv) {
         printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
         exit(4);
     }
+
+    crypto->primefiller();
+    crypto->setkeys();
+
 
     SDL_CreateThread(on_receive, "ConnectionReceiveThread", (void*)socket);
     SDL_CreateThread(on_send, "ConnectionSendThread", (void*)socket);

@@ -53,11 +53,13 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 import static com.almasb.fxglgames.pong.NetworkMessages.*;
+import static com.almasb.fxglgames.pong.Crypto.*;
 
 /**
  * A simple clone of Pong.
@@ -84,6 +86,8 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     public int maxGameTime = 0;
 
     public static final int TILE_SIZE = 30;
+
+    public List<Integer> codedMessage;
 
     public TimerAction maxGameTimer;
 
@@ -241,10 +245,15 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
         server = getNetService().newTCPServer(55555, new ServerConfig<>(String.class));
 
+        primeFiller();
+        setKeys();
+
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
             if (connection.getConnectionNum() == 1) {
-                connection.send("SETUP,1," + player1Comp.getEntity().getHeight());
+//                connection.send("SETUP,1," + player1Comp.getEntity().getHeight());
+                connection.send("START," + getPublicKey() + "," + getPrivateKey() + "," + getN());
+                connection.send(sendEncryptedString("SETUP,1," + player1Comp.getEntity().getHeight()));
             } else if (connection.getConnectionNum() == 2) {
                 connection.send("SETUP,2," + player2Comp.getEntity().getHeight());
             } else if (connection.getConnectionNum() == 3) {

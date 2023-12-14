@@ -10,6 +10,7 @@
 
 Level::Level(SDL_Renderer* renderer)
 {
+	LevelTime = SDL_GetTicks();
     createLevelFromString(levelText);
 }
 
@@ -71,6 +72,7 @@ void Level::drawMap(SDL_Renderer* renderer)
 
 void Level::updateMap(int sentX, int sentY, int newTileType)
 {
+
 	for (int row = 0; row < NUM_ROWS; row++)
 	{
 		for (int col = 0; col < NUM_COLS; col++)
@@ -87,6 +89,10 @@ void Level::updateMap(int sentX, int sentY, int newTileType)
 			
 		}
 	}
+
+		
+	
+
 }
 
 
@@ -113,12 +119,15 @@ void Level::bombExplosion(int bombX, int bombY, int bombRadius)
 			for (int col = 0; col < NUM_COLS; col++)
 			{
 				// Look for tiles that are on the same X and Y axis as the bomb
-				if (((abs(bombPosX - col) == 0 && abs(bombPosY - row) == explosionCircle) || (abs(bombPosY - row) == 0 && abs(bombPosX - col) == explosionCircle)) && map[row][col] != 1)
+				if (((abs(bombPosX - col) == 0 && abs(bombPosY - row) == explosionCircle) || (abs(bombPosY - row) == 0 && abs(bombPosX - col) == explosionCircle)) && map[row][col] != 1 )
 				{
 					// Save tiles before the explosion
+
 					previousTileType.push_back(map[row][col]);
 					previousTilePosX.push_back(row);
 					previousTilePosY.push_back(col);
+
+
 
 					map[row][col] = 4;
 					
@@ -134,18 +143,25 @@ void Level::bombExplosion(int bombX, int bombY, int bombRadius)
 
 void Level::clearBombExplosion()
 {
-	for (int row = 0; row < NUM_ROWS; row++)
-	{
-		for (int col = 0; col < NUM_COLS; col++)
-		{
-			for (unsigned int i = 0; i < previousTileType.size(); i++)
-			{
-				if (row == previousTilePosX[i] && col == previousTilePosY[i])
-				{
-					map[row][col] = previousTileType[i];
-				}
-			}
+	int time_now = SDL_GetTicks();
+	int time_delta = time_now - LevelTime;
 
+	if (time_delta > 1000)
+	{
+		for (int row = 0; row < NUM_ROWS; row++)
+		{
+			for (int col = 0; col < NUM_COLS; col++)
+			{
+				for (unsigned int i = 0; i < previousTileType.size(); i++)
+				{
+					if ((row == previousTilePosX[i] && col == previousTilePosY[i]) && map[row][col] == 4)
+					{
+						map[row][col] = previousTileType[i];
+					}
+				}
+
+			}
 		}
+		LevelTime = time_now;
 	}
 }

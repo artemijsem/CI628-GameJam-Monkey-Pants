@@ -90,6 +90,7 @@ public class BombermanFactory implements EntityFactory {
         PhysicsComponent physics = new PhysicsComponent();
         physics.setBodyType(BodyType.DYNAMIC);
 
+
         return entityBuilder(data)
                 .type(EntityType.POWERUP)
                 .viewWithBBox(new Rectangle(20,20, Color.GREEN))
