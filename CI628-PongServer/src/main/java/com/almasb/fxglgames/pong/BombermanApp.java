@@ -236,6 +236,10 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         vars.put("player3lives", 3);
         vars.put("player4lives", 3);
         vars.put("numOfConnections", 0);
+        vars.put("player1key" , 0);
+        vars.put("player2key" , 0);
+        vars.put("player3key" , 0);
+        vars.put("player4key" , 0);
     }
 
     @Override
@@ -245,15 +249,16 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
         server = getNetService().newTCPServer(55555, new ServerConfig<>(String.class));
 
-        primeFiller();
-        setKeys();
+        Crypto crypto = new Crypto();
+
+        crypto.generateKey();
 
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
             if (connection.getConnectionNum() == 1) {
 //                connection.send("SETUP,1," + player1Comp.getEntity().getHeight());
-                connection.send("START," + getPublicKey() + "," + getPrivateKey() + "," + getN());
-                connection.send(sendEncryptedString("SETUP,1," + player1Comp.getEntity().getHeight()));
+                connection.send("START," + crypto.getSecretKey());
+                connection.send(crypto.encrypt("SETUP,1," + player1Comp.getEntity().getHeight()));
             } else if (connection.getConnectionNum() == 2) {
                 connection.send("SETUP,2," + player2Comp.getEntity().getHeight());
             } else if (connection.getConnectionNum() == 3) {
@@ -543,6 +548,11 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
             {
                 connection.terminate();
                 System.out.println("Client Closed");
+            }
+
+            if(key.startsWith("CLIENT_PUBLIC_KEY") && connection.getConnectionNum() == 1)
+            {
+
             }
 
         });

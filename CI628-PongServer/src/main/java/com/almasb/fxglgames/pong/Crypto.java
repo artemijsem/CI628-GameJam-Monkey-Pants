@@ -2,142 +2,52 @@ package com.almasb.fxglgames.pong;
 
 
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.nio.charset.StandardCharsets;
 
-public class Crypto {
-    private static HashSet<Integer> prime = new HashSet<>();
-    private static Integer public_key = null;
-    private static Integer private_key = null;
-    private static Integer n = null;
-    private static Random random = new Random();
+public class Crypto  implements CryptoInterface{
 
+    private int secretKey;
 
-    public static void primeFiller()
-    {
-        boolean[] sieve = new boolean[250];
-        for (int i = 0; i < 250; i++) {
-            sieve[i] = true;
+    @Override
+    public String encrypt(String data_string) {
+        // Convert string to byte array
+        byte[] data = data_string.getBytes(StandardCharsets.UTF_8);
+        byte[] encoded_data = new byte[data.length];
+
+        for (int i = 0; i < data.length; i++)
+        {
+            // If number is even then add the key step if off then decrement the key step
+            encoded_data[i] = (byte)((i % 2 == 0) ? data[i] + secretKey : data[i] - secretKey);
         }
 
-        sieve[0] = false;
-        sieve[1] = false;
+        // Convert bytes back to string using defined Charset to ensure the correct serialising
+        String encoded_data_string = new String(encoded_data, StandardCharsets.UTF_8);
 
-        for (int i = 2; i < 250; i++) {
-            for (int j = i * 2; j < 250; j += i) {
-                sieve[j] = false;
-            }
-        }
-
-        for (int i = 0; i < sieve.length; i++) {
-            if (sieve[i]) {
-                prime.add(i);
-            }
-        }
+        return encoded_data_string;
     }
 
-    public static int pickRandomPrime()
-    {
-        int k = random.nextInt(prime.size());
-        List<Integer> primeList = new ArrayList<>(prime);
-        int ret = primeList.get(k);
-        prime.remove(ret);
-        return ret;
-    }
+    @Override
+    public String decrypt(String data_string) {
+        byte[] data = data_string.getBytes(StandardCharsets.UTF_8);
+        byte[] decoded_data = new byte[data.length];
 
-    public static void setKeys()
-    {
-        int prime1 = pickRandomPrime();
-        int prime2 = pickRandomPrime();
-
-        n = prime1 * prime2;
-        int fi = (prime1 - 1) * (prime2 - 1);
-
-        int e = 2;
-        while (true) {
-            if (gcd(e, fi) == 1) {
-                break;
-            }
-            e += 1;
+        for (int i = 0; i < data.length; i++)
+        {
+            decoded_data[i] = (byte)((i % 2 == 0) ? data[i] - secretKey : data[i] + secretKey);
         }
 
-        public_key = e;
+        String decoded_data_string = new String(decoded_data, StandardCharsets.UTF_8);
 
-        int d = 2;
-        while (true) {
-            if ((d * e) % fi == 1) {
-                break;
-            }
-            d += 1;
-        }
-
-        private_key = d;
+        return decoded_data_string;
     }
 
-    public static int encrypt(int message)
-    {
-        int e = public_key;
-        int encrypted_text = 1;
-        while (e > 0) {
-            encrypted_text *= message;
-            encrypted_text %= n;
-            e -= 1;
-        }
-        return encrypted_text;
+    @Override
+    public void generateKey() {
+        secretKey = (int)(Math.random() * 10);
     }
 
-    public static int decrypt(int encrypted_text)
-    {
-        int d = private_key;
-        int decrypted = 1;
-        while (d > 0) {
-            decrypted *= encrypted_text;
-            decrypted %= n;
-            d -= 1;
-        }
-        return decrypted;
+    @Override
+    public int getSecretKey() {
+        return secretKey;
     }
-
-    public static int gcd(int a, int b)
-    {
-        if (b == 0) {
-            return a;
-        }
-        return gcd(b, a % b);
-    }
-
-    public static List<Integer> encoder(String message)
-    {
-        List<Integer> encoded = new ArrayList<>();
-        for (char letter : message.toCharArray()) {
-            encoded.add(encrypt((int)letter));
-        }
-        return encoded;
-    }
-
-    public static String decoder(List<Integer> encoded)
-    {
-        StringBuilder s = new StringBuilder();
-        for (int num : encoded) {
-            s.append((char)decrypt(num));
-        }
-        return s.toString();
-    }
-
-    public static String sendEncryptedString(String message)
-    {
-        List<Integer> coded = encoder(message);
-        String encodedMessage = String.join("", coded.stream()
-                .map(Object::toString)
-                .toArray(String[] ::new));
-        return encodedMessage;
-    }
-
-    public static int getPublicKey() {return public_key;}
-
-    public static int getPrivateKey() {return private_key;}
-
-    public static int getN() { return n;}
 }
