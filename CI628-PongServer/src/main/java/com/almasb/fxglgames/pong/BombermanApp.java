@@ -91,6 +91,8 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
     public TimerAction maxGameTimer;
 
+    static Crypto crypto = new Crypto();
+
     // Last 4 inputs will be logged
     public HashMap<String, Integer> firstPlayerKeyMap = new HashMap<String, Integer>() {{
         put("W", 0);
@@ -130,103 +132,6 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
     Server<String> getServer() { return server; };
 
-/*    @Override
-    protected void initInput() {
-        getInput().addAction(new UserAction("Up1") {
-            @Override
-            protected void onAction() {
-                player1Bat.up();
-            }
-
-            @Override
-            protected void onActionEnd() {
-                player1Bat.stop();
-            }
-        }, KeyCode.W);
-
-        getInput().addAction(new UserAction("Down1") {
-            @Override
-            protected void onAction() {
-                player1Bat.down();
-            }
-
-            @Override
-            protected void onActionEnd() {
-                player1Bat.stop();
-            }
-        }, KeyCode.S);
-
-        getInput().addAction(new UserAction("Left1") {
-            @Override
-            protected void onAction() {
-                player1Bat.left();
-            }
-
-            @Override
-            protected void onActionEnd() {
-                player1Bat.stop();
-            }
-        }, KeyCode.A);
-
-        getInput().addAction(new UserAction("Right1") {
-            @Override
-            protected void onAction() { player1Bat.right(); }
-
-            @Override
-            protected void onActionEnd() {
-                player1Bat.stop();
-            }
-        }, KeyCode.D);
-
-        getInput().addAction(new UserAction("Up2") {
-            @Override
-            protected void onAction() {
-                player2Bat.up();
-            }
-
-            @Override
-            protected void onActionEnd() {
-                player2Bat.stop();
-            }
-        }, KeyCode.I);
-
-        getInput().addAction(new UserAction("Down2") {
-            @Override
-            protected void onAction() {
-                player2Bat.down();
-            }
-
-            @Override
-            protected void onActionEnd() {
-                player2Bat.stop();
-            }
-        }, KeyCode.K);
-
-        getInput().addAction(new UserAction("Left2") {
-            @Override
-            protected void onAction() {
-                player2Bat.left();
-            }
-
-            @Override
-            protected void onActionEnd() {
-                player2Bat.stop();
-            }
-        }, KeyCode.J);
-
-        getInput().addAction(new UserAction("Right2") {
-            @Override
-            protected void onAction() {
-                player2Bat.right();
-            }
-
-            @Override
-            protected void onActionEnd() {
-                player2Bat.stop();
-            }
-        }, KeyCode.L);
-    }*/
-
 
 
     @Override
@@ -236,10 +141,6 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         vars.put("player3lives", 3);
         vars.put("player4lives", 3);
         vars.put("numOfConnections", 0);
-        vars.put("player1key" , 0);
-        vars.put("player2key" , 0);
-        vars.put("player3key" , 0);
-        vars.put("player4key" , 0);
     }
 
     @Override
@@ -249,32 +150,28 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
         server = getNetService().newTCPServer(55555, new ServerConfig<>(String.class));
 
-        Crypto crypto = new Crypto();
 
         crypto.generateKey();
 
         server.setOnConnected(connection -> {
             connection.addMessageHandlerFX(this);
             if (connection.getConnectionNum() == 1) {
-//                connection.send("SETUP,1," + player1Comp.getEntity().getHeight());
-                connection.send("START," + crypto.getSecretKey());
-                connection.send(crypto.encrypt("SETUP,1," + player1Comp.getEntity().getHeight()));
+                connection.send(crypto.encryptDecrypt("START," + crypto.getSecretKey()));
+                connection.send("SETUP,1," + player1Comp.getEntity().getHeight());
             } else if (connection.getConnectionNum() == 2) {
+                connection.send(crypto.encryptDecrypt("START," + crypto.getSecretKey()));
                 connection.send("SETUP,2," + player2Comp.getEntity().getHeight());
             } else if (connection.getConnectionNum() == 3) {
+                connection.send(crypto.encryptDecrypt("START," + crypto.getSecretKey()));
                 connection.send("SETUP,3," + player3Comp.getEntity().getHeight());
             } else if (connection.getConnectionNum() == 4) {
+                connection.send(crypto.encryptDecrypt("START," + crypto.getSecretKey()));
                 connection.send("SETUP,4," + player4Comp.getEntity().getHeight());
             }
             inc("numOfConnections", 1);
 
         });
 
-
-//        run()
-        eventBuilder().when(() -> geti("numOfConnections") == 1)
-                .thenRun(() -> maxGameTimer=run(getMaxGameTimeReached(), Duration.seconds(1)))
-                .buildAndStart();
         
 
         getGameWorld().addEntityFactory(new BombermanFactory());
@@ -291,65 +188,9 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         t.start();
     }
 
-    @NotNull
-    private Runnable getMaxGameTimeReached() {
-        return () -> {
-            gameTime--;
-            System.out.println("Current Game Time: " + gameTime);
-            Text gameTimerText = geto("gameTimerText");
-            gameTimerText.setText(gameTime + "");
-
-            animationBuilder()
-                    .interpolator(Interpolators.ELASTIC.EASE_IN_OUT())
-                    .duration(Duration.seconds(0.5))
-                    .scale(gameTimerText)
-                    .from(new Point2D(1, 1))
-                    .to(new Point2D(2, 2))
-                    .buildAndPlay();
-
-            animationBuilder()
-                    .interpolator(Interpolators.SMOOTH.EASE_IN())
-                    .duration(Duration.seconds(0.5))
-                    .rotate(gameTimerText)
-                    .from(0)
-                    .to(360)
-                    .buildAndPlay();
-
-            server.broadcast("TIMER, " + gameTime + "");
-
-            if (gameTime <= maxGameTime) {
-                System.out.println("Max Game Time Reached");
-                server.broadcast("GAME_TIME_OVER,");
-                maxGameTimer.expire();
-            }
-        };
-    }
-
     @Override
     protected void initPhysics() {
         getPhysicsWorld().setGravity(0, 0);
-
-        CollisionHandler bombPlayerHandler = new CollisionHandler(EntityType.BOMB, EntityType.PLAYER) {
-            @Override
-            protected void onCollisionBegin(Entity bomb, Entity player) {
-
-                switch (player.getComponent(PlayerComponent.class).playerNum)
-                {
-                    case 1:
-                        server.broadcast(BOMB_HIT_PLAYER_ONE);
-                        break;
-                    case 2:
-                        server.broadcast(BOMB_HIT_PLAYER_TWO);
-                        break;
-                    case 3:
-                        server.broadcast(BOMB_HIT_PLAYER_THR);
-                        break;
-                    case 4:
-                        server.broadcast(BOMB_HIT_PLAYER_FOR);
-                        break;
-                }
-            }
-        };
 
         CollisionHandler powerupPlayerHandler = new CollisionHandler(EntityType.POWERUP, EntityType.PLAYER) {
             @Override
@@ -383,7 +224,8 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         if (!server.getConnections().isEmpty()) {
             var message = "GAME_DATA," + player1.getY() + "," + player1.getX() + "," +
                     player2.getY() + "," + player2.getX() + "," + player3.getY() + "," + player3.getX()
-                    + "," + player4.getY() + "," + player4.getX();
+                    + "," + player4.getY() + "," + player4.getX() + "," + player1Comp.getLives() + "," + player2Comp.getLives()
+                    + "," + player3Comp.getLives() + "," + player4Comp.getLives();
                     server.broadcast(message);
         }
 
@@ -602,6 +444,7 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
         @Override
         public void write(String s) throws Exception {
+            s = crypto.encryptDecrypt(s);
             out.print(s.toCharArray());
             out.flush();
         }
@@ -625,6 +468,7 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
                     while ((len = in.read(buf)) > 0) {
                         var message = new String(Arrays.copyOf(buf, len));
+                        message = crypto.encryptDecrypt(message);
 
                         System.out.println("Recv message: " + message);
 

@@ -28,8 +28,8 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     }
 
     if (cmd == "GAME_DATA") {
-        // we should have exactly 6 arguments
-        if (args.size() == 8) {
+        // we should have exactly 12 arguments
+        if (args.size() == 12) {
             game_data.player1Y = stoi(args.at(0));
             game_data.player1X = stoi(args.at(1));
             game_data.player2Y = stoi(args.at(2));
@@ -38,10 +38,10 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
             game_data.player3X = stoi(args.at(5));
             game_data.player4Y = stoi(args.at(6));
             game_data.player4X = stoi(args.at(7));
-            //game_data.ballX = stoi(args.at(4));
-            //game_data.ballY = stoi(args.at(5));
-
-            
+            game_data.player1Lives = stoi(args.at(8));
+            game_data.player2Lives = stoi(args.at(9));
+            game_data.player3Lives = stoi(args.at(10));
+            game_data.player4Lives = stoi(args.at(11));
             
           
         }
@@ -212,8 +212,8 @@ void MyGame::init(SDL_Renderer* renderer)
     playerFourText = TextureManager::LoadTexture("../assets/images/Player_Four.png", renderer);
     TTF_Init();
 
-    font = TTF_OpenFont("../assets/fonts/arial.ttf", 72);
-    smallFont = TTF_OpenFont("../assets/fonts/arial.ttf", 24);
+    font = TTF_OpenFont("../assets/fonts/Retro_Gaming.ttf", 72);
+    smallFont = TTF_OpenFont("../assets/fonts/Retro_Gaming.ttf", 24);
 
 
 
@@ -245,14 +245,93 @@ void MyGame::render(SDL_Renderer* renderer) {
 
 void MyGame::drawUI(SDL_Renderer* renderer) {
 
-    //textSurface = TTF_RenderText_Solid(smallFont, "Game Time", textColor);
-    //textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    //SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
-    //textRect = { 700 - textW/2, 50, textW, textH };
-    //SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+    // Player One Lives
+    TextureManager::Draw(renderer, playerOneText, { 70, 15, 30, 30 });
 
-    //SDL_FreeSurface(textSurface);
-    //SDL_DestroyTexture(textTexture);
+    textSurface = TTF_RenderText_Solid(smallFont, "X", textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    textRect = { 100 , 20, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    textSurface = TTF_RenderText_Solid(smallFont, std::to_string(game_data.player1Lives).c_str(), textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    textRect = { 125, 20, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+
+    // Player Two Lives
+
+    TextureManager::Draw(renderer, playerTwoText, { 175, 15, 30, 30 });
+
+    textSurface = TTF_RenderText_Solid(smallFont, "X", textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    textRect = { 205 , 20, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    textSurface = TTF_RenderText_Solid(smallFont, std::to_string(game_data.player2Lives).c_str(), textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    textRect = { 230, 20, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    // Player Three Lives
+
+    TextureManager::Draw(renderer, playerThreeText, { 280, 15, 30, 30 });
+
+    textSurface = TTF_RenderText_Solid(smallFont, "X", textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    textRect = { 310 , 20, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    textSurface = TTF_RenderText_Solid(smallFont, std::to_string(game_data.player3Lives).c_str(), textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    textRect = { 335, 20, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    // Player Four Lives
+
+    TextureManager::Draw(renderer, playerFourText, { 385, 15, 30, 30 });
+
+    textSurface = TTF_RenderText_Solid(smallFont, "X", textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    textRect = { 415 , 20, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    textSurface = TTF_RenderText_Solid(smallFont, std::to_string(game_data.player4Lives).c_str(), textColor);
+    textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+    textRect = { 440, 20, textW, textH };
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
 
     ////std::cout << "Drawing UI" << std::endl; 
     //textSurface = TTF_RenderText_Solid(font, std::to_string(game_data.gameTime).c_str(), textColor);

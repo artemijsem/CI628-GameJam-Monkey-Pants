@@ -6,26 +6,19 @@
 #include <numeric>
 
 
-std::string Crypto::encrypt(std::string data_string)
+void Crypto::encryptDecrypt(char* data)
 {
 	
-	char encoded_data[1024];
-	strcpy(encoded_data, data_string.c_str());
 
-	for (int i = 0; i < data_string.size(); i++)
+	for (int i = 0; i < strlen(data); i++)
 	{
-		encoded_data[i] = (char)((i % 2 == 0) ? encoded_data[i] + secret_key : encoded_data - secret_key);
+		data[i] = data[i] ^ secret_key;
 	}
 	
-	
 }
 
-std::string Crypto::decrpyt(std::string data_string)
-{
 
-}
-
-void Crypto::setSecretKey(int key)
+void Crypto::setSecretKey(char key)
 {
 	secret_key = key;
 	keyIsSet = true;

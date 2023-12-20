@@ -11,13 +11,12 @@ class Crypto {
 
 private:
 
-    int secret_key;
+    char secret_key;
     bool keyIsSet = false;
 public:
 
-    std::string encrypt(std::string data_string);
-    std::string decrpyt(std::string data_string);
-    void setSecretKey(int key);
+    void encryptDecrypt(char * data);
+    void setSecretKey(char key);
     bool isKeySet() { return keyIsSet; }
 
 };

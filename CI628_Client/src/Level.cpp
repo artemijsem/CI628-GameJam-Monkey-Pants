@@ -83,7 +83,10 @@ void Level::updateMap(int sentX, int sentY, int newTileType)
 			// If creating a new tile
 			else
 			{
-				map[sentY / MAP_TILE_SIZE][sentX / MAP_TILE_SIZE] = newTileType;
+				//std::cout << std::endl << std::endl << "========== SENT BOMB POS ================" << std::endl;
+				//std::cout << "  POS X:  " << sentX << "      POS Y:  " << sentY << std::endl;
+				//std::cout << "==========================================" << std::endl;
+				map[(int)(sentY / MAP_TILE_SIZE)][(int)(sentX / MAP_TILE_SIZE)] = newTileType;
 				
 			}
 			
@@ -157,6 +160,8 @@ void Level::clearBombExplosion()
 					if ((row == previousTilePosX[i] && col == previousTilePosY[i]) && map[row][col] == 4)
 					{
 						map[row][col] = previousTileType[i];
+
+						if (map[row][col] == 3) { map[row][col] = 0; }
 					}
 				}
 

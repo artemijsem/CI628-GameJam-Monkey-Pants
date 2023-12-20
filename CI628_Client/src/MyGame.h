@@ -14,12 +14,16 @@
 #include "Level.h"
 
 static struct GameData {
+    int player1Lives = 0;
     int player1Y = 0;
     int player1X = 0;
+    int player2Lives = 0;
     int player2Y = 0;
     int player2X = 0;
+    int player3Lives = 0;
     int player3Y = 0;
     int player3X = 0;
+    int player4Lives = 0;
     int player4Y = 0;
     int player4X = 0;
     int playerSize;

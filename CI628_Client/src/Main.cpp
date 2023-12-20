@@ -21,10 +21,10 @@ MyGame* game = new MyGame();
 
 Crypto* crypto = new Crypto();
 
+const int message_length = 1024;
+
 static int on_receive(void* socket_ptr) {
     TCPsocket socket = (TCPsocket)socket_ptr;
-
-    const int message_length = 1024;
 
     char message[message_length];
     int received;
@@ -38,19 +38,16 @@ static int on_receive(void* socket_ptr) {
         message[received] = '\0';
         if (crypto->isKeySet())
         {
-
-            messageString = message;
-            std::cout << std::endl << std::endl << "MESSAGE STRING BEFORE:" << messageString << std::endl;
             
-            messageString = crypto->decrpyt(messageString).c_str();
-            std::cout << std::endl << std:: endl << "MESSAGE STRING DONE:" << messageString << std::endl << std::endl;
+            crypto->encryptDecrypt(message);
+            messageString = message;
             
         }
 
         else { messageString = message; }
 
 
-        char* pch = strtok((char *)messageString.c_str(), ",");
+        char* pch = strtok(message, ",");
 
         // get the command, which is the first string in the message
         string cmd(pch);
@@ -100,7 +97,12 @@ static int on_send(void* socket_ptr) {
 
             cout << "Sending_TCP: " << message << endl;
 
-            SDLNet_TCP_Send(socket, message.c_str(), message.length());
+            char messageChar[message_length];
+            strcpy(messageChar, message.c_str());
+
+            crypto->encryptDecrypt(messageChar);
+
+            SDLNet_TCP_Send(socket, messageChar, message.length());
         }
 
         SDL_Delay(1);
