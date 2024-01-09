@@ -5,6 +5,9 @@ package com.almasb.fxglgames.pong;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
+/**
+ * @author Artemi Sementsenko (artemijsem) (artsem0107@gmail.com)
+ */
 public class Crypto  implements CryptoInterface{
 
     private char secretKey;

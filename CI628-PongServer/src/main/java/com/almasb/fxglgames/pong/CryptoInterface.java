@@ -1,5 +1,8 @@
 package com.almasb.fxglgames.pong;
 
+/**
+ * @author Artemi Sementsenko (artemijsem) (artsem0107@gmail.com)
+ */
 public interface CryptoInterface {
 
 

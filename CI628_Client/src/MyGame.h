@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <map>
 
 #include "SDL.h"
 #include "Level.h"
@@ -58,11 +59,20 @@ class MyGame {
         SDL_Rect textRect; 
         int textW, textH; 
 
-        bool playerOneAlive = true;
-        bool playerTwoAlive = true;
-        bool playerThrAlive = true;
-        bool playerForAlive = true;
+        Mix_Chunk* music = NULL;
+        Mix_Chunk* bombExplosion = NULL;
+        Mix_Chunk* playerHit = NULL;
+        Mix_Chunk* powerUpPickUp = NULL;
+        Mix_Chunk* gameWinSound = NULL;
+        Mix_Chunk* gameLostSound = NULL;
+
+        bool gameIsOver = false;
+        bool gameIsWon = false;
+        bool disconnected = false;
        
+        std::map<int, int> playersAlive;
+        int alivePlayersNum = 4;
+        
 
         void on_receive(std::string message, std::vector<std::string>& args);
         void send(std::string message);
@@ -74,7 +84,6 @@ class MyGame {
         SDL_Rect getPlayerFourRect() { return player4; }
         void update();
         void render(SDL_Renderer* renderer);
-        SDL_Renderer* getGameRenderer();
         void drawUI(SDL_Renderer* renderer);
         void gameOver(SDL_Renderer* renderer);
         void quitGame(); 

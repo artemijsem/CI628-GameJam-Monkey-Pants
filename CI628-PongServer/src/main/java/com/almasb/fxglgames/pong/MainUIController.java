@@ -60,24 +60,8 @@ public class MainUIController implements UIController {
 
     @Override
     public void init() {
-        labelScoreEnemy.setFont(FXGL.getUIFactoryService().newFont(72));
-
-        labelScoreEnemy.layoutBoundsProperty().addListener((observable, oldValue, newBounds) -> {
-            double width = newBounds.getWidth();
-            labelScoreEnemy.setTranslateX(800 - 100 - width);
-        });
 
 
-
-        FXGL.addUINode(gameTime, 400, 200);
-        gameTime.setFill(Color.RED);
-        FXGL.set("gameTimerText", gameTime);
-        gameTime.setFont(Font.font(72));
-
-        FXGL.addUINode(playerOneLives, 100, 100);
-        playerOneLives.setFill(Color.WHITE);
-        FXGL.set("playerOneLivesText", playerOneLives);
-        playerOneLives.setFont(Font.font(72));
 
     }
 

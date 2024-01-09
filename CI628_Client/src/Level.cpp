@@ -11,13 +11,12 @@
 Level::Level(SDL_Renderer* renderer)
 {
 	LevelTime = SDL_GetTicks();
+	ClearTime = SDL_GetTicks();
     createLevelFromString(levelText);
 }
 
 void Level::createLevelFromString(std::string level)
 {
-    int myArray[NUM_ROWS][NUM_COLS];
-
     int index = 0;
     for (int row = 0; row < NUM_ROWS; ++row) {
         for (int col = 0; col < NUM_COLS; ++col) {
@@ -30,7 +29,6 @@ void Level::createLevelFromString(std::string level)
 
 void Level::drawMap(SDL_Renderer* renderer)
 {
-
 	int mapTileType = 0;
 
 	for (int row = 0; row < NUM_ROWS; row++)
@@ -48,7 +46,6 @@ void Level::drawMap(SDL_Renderer* renderer)
 			case 0:
 				break;
 			case 1:
-				/*TextureManager::Draw(wall, src, dest);*/
 				TextureManager::Draw(renderer, wall, dest);
 				break;
 			case 2:
@@ -72,7 +69,6 @@ void Level::drawMap(SDL_Renderer* renderer)
 
 void Level::updateMap(int sentX, int sentY, int newTileType)
 {
-
 	for (int row = 0; row < NUM_ROWS; row++)
 	{
 		for (int col = 0; col < NUM_COLS; col++)
@@ -83,33 +79,17 @@ void Level::updateMap(int sentX, int sentY, int newTileType)
 			// If creating a new tile
 			else
 			{
-				//std::cout << std::endl << std::endl << "========== SENT BOMB POS ================" << std::endl;
-				//std::cout << "  POS X:  " << sentX << "      POS Y:  " << sentY << std::endl;
-				//std::cout << "==========================================" << std::endl;
 				map[(int)(sentY / MAP_TILE_SIZE)][(int)(sentX / MAP_TILE_SIZE)] = newTileType;
-				
 			}
-			
 		}
 	}
-
-		
-	
-
 }
-
-
-
 
 void Level::bombExplosion(int bombX, int bombY, int bombRadius)
 {
 	// COnversion from absoulte X and Y pos to map array pos
 	int bombPosX = bombX / MAP_TILE_SIZE;
 	int bombPosY = bombY / MAP_TILE_SIZE;
-
-	previousTileType.clear();
-	previousTilePosX.clear();
-	previousTilePosY.clear();
 
 	// Clear out bomb texture
 	map[bombPosY][bombPosX] = 0;
@@ -122,26 +102,23 @@ void Level::bombExplosion(int bombX, int bombY, int bombRadius)
 			for (int col = 0; col < NUM_COLS; col++)
 			{
 				// Look for tiles that are on the same X and Y axis as the bomb
-				if (((abs(bombPosX - col) == 0 && abs(bombPosY - row) == explosionCircle) || (abs(bombPosY - row) == 0 && abs(bombPosX - col) == explosionCircle)) && map[row][col] != 1 )
+				if (((abs(bombPosX - col) == 0 && abs(bombPosY - row) == explosionCircle) || (abs(bombPosY - row) == 0 
+					&& abs(bombPosX - col) == explosionCircle)) && map[row][col] != 1 )
 				{
 					// Save tiles before the explosion
+					if (map[row][col] != 5)
+					{
+						previousTileType.push_back(map[row][col]);
+						previousTilePosX.push_back(row);
+						previousTilePosY.push_back(col);
 
-					previousTileType.push_back(map[row][col]);
-					previousTilePosX.push_back(row);
-					previousTilePosY.push_back(col);
-
-
-
-					map[row][col] = 4;
-					
-
+						map[row][col] = 4;
+					}
 				}
 
 			}
 		}
 	}
-	
-
 }
 
 void Level::clearBombExplosion()
@@ -157,11 +134,14 @@ void Level::clearBombExplosion()
 			{
 				for (unsigned int i = 0; i < previousTileType.size(); i++)
 				{
+					// Check if the tile was modified and if it is powerup
 					if ((row == previousTilePosX[i] && col == previousTilePosY[i]) && map[row][col] == 4)
 					{
 						map[row][col] = previousTileType[i];
 
+						// If bomb texture was remembered clear it
 						if (map[row][col] == 3) { map[row][col] = 0; }
+
 					}
 				}
 
@@ -170,3 +150,4 @@ void Level::clearBombExplosion()
 		LevelTime = time_now;
 	}
 }
+

@@ -47,7 +47,7 @@ import javafx.scene.shape.Rectangle;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
 /**
- * @author Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
+ * @author Artemi Sementsenko (artemijsem) (artsem0107@gmail.com)
  */
 public class BombermanFactory implements EntityFactory {
 

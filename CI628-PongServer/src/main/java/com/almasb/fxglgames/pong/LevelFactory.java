@@ -11,6 +11,9 @@ import javafx.scene.shape.Rectangle;
 
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 
+/**
+ * @author Artemi Sementsenko (artemijsem) (artsem0107@gmail.com)
+ */
 public class LevelFactory implements EntityFactory {
 
     int BLOCK_SIZE = 30;

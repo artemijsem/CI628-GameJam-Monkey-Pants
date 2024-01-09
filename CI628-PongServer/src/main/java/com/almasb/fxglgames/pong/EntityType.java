@@ -27,7 +27,7 @@
 package com.almasb.fxglgames.pong;
 
 /**
- * @author Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
+ * @author Artemi Sementsenko (artemijsem) (artsem0107@gmail.com)
  */
 public enum  EntityType {
     PLAYER, BOMB, WALL, BRICK, POWERUP

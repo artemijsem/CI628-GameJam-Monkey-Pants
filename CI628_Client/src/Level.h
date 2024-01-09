@@ -18,6 +18,7 @@ public:
 
 	int map[NUM_ROWS][NUM_COLS];
 	int LevelTime = 0;
+	int ClearTime = 0;
 	
 	std::vector<int> previousTileType;
 	std::vector<int> previousTilePosX;

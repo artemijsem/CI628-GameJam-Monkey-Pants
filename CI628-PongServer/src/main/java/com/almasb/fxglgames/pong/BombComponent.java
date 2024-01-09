@@ -37,7 +37,7 @@ import static java.lang.Math.abs;
 import static java.lang.Math.signum;
 
 /**
- * @author Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
+ * @author Artemi Sementsenko (artemijsem) (artsem0107@gmail.com)
  */
 public class BombComponent extends Component {
 

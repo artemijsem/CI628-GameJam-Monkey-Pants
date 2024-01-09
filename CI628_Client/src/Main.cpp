@@ -34,7 +34,7 @@ static int on_receive(void* socket_ptr) {
         received = SDLNet_TCP_Recv(socket, message, message_length);
         std::string messageString;
 
-        //message = crypto->decoder(encodedMessageVector);
+        // If the secret key for encryption has been recieved use it for encryption/decryption
         message[received] = '\0';
         if (crypto->isKeySet())
         {
@@ -67,9 +67,7 @@ static int on_receive(void* socket_ptr) {
         {
             crypto->setSecretKey(stoi(args.at(0)));
 
-        }
-
-        
+        }      
         
         game->on_receive(cmd, args);
 
@@ -146,6 +144,7 @@ void loop(SDL_Renderer* renderer) {
 
         game->render(renderer);
 
+
         
 
         SDL_RenderPresent(renderer);
@@ -200,12 +199,17 @@ int main(int argc, char** argv) {
         exit(2);
     }
 
+    if (TTF_Init() == -1)
+    {
+        printf("TTF_Init: %s\n", TTF_GetError);
+        exit(3);
+    }
     IPaddress ip;
 
     // Resolve host (ip name + port) into an IPaddress type
     if (SDLNet_ResolveHost(&ip, IP_NAME, PORT) == -1) {
         printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
-        exit(3);
+        exit(4);
     }
 
     // Open the connection to the server
@@ -213,7 +217,7 @@ int main(int argc, char** argv) {
 
     if (!socket) {
         printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
-        exit(4);
+        exit(5);
     }
 
 

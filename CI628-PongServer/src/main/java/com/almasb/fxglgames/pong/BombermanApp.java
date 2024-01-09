@@ -58,20 +58,19 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
-import static com.almasb.fxglgames.pong.NetworkMessages.*;
 import static com.almasb.fxglgames.pong.Crypto.*;
 
 /**
- * A simple clone of Pong.
- * Sounds from https://freesound.org/people/NoiseCollector/sounds/4391/ under CC BY 3.0.
+ * An implementation of Bomberman Server based on the codebase provided by Almas Baimagambetov.
  *
- * @author Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
+ *
+ * @author Artemi Sementsenko (artemijsem) (artsem0107@gmail.com)
  */
 public class BombermanApp extends GameApplication implements MessageHandler<String> {
 
     @Override
     protected void initSettings(GameSettings settings) {
-        settings.setTitle("Pong");
+        settings.setTitle("Bomberman Server");
         settings.setVersion("1.0");
         settings.setFontUI("pong.ttf");
         settings.setTicksPerSecond(60);
@@ -150,7 +149,6 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
 
         server = getNetService().newTCPServer(55555, new ServerConfig<>(String.class));
 
-
         crypto.generateKey();
 
         server.setOnConnected(connection -> {
@@ -167,6 +165,11 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
             } else if (connection.getConnectionNum() == 4) {
                 connection.send(crypto.encryptDecrypt("START," + crypto.getSecretKey()));
                 connection.send("SETUP,4," + player4Comp.getEntity().getHeight());
+            }
+            // If new client is trying to connect but the slots are full send the message
+            else
+            {
+                connection.send(crypto.encryptDecrypt("SERVER_IS_FULL"));
             }
             inc("numOfConnections", 1);
 
@@ -213,10 +216,6 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         MainUIController controller = new MainUIController();
         UI ui = getAssetLoader().loadUI("main.fxml", controller);
 
-        controller.getLabelPlayerOneLive().textProperty().bind(getip("player1lives").asString());
-        controller.getLabelScoreEnemy().textProperty().bind(getip("player2lives").asString());
-
-
     }
 
     @Override
@@ -228,10 +227,6 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
                     + "," + player3Comp.getLives() + "," + player4Comp.getLives();
                     server.broadcast(message);
         }
-
-        Text playerOneText = geto("playerOneLivesText");
-        playerOneText.setText("" + player1Comp.getLives());
-
     }
 
     public void onBrickDestroyed(Entity brick)
@@ -253,6 +248,7 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
     public void onPlayerDamaged(Entity player)
     {
         player.getComponent(PlayerComponent.class).lives--;
+        server.broadcast("PLAYER_HIT");
         if(player.getComponent(PlayerComponent.class).getLives() <= 0)
         {
             getGameWorld().removeEntity(player);
@@ -287,17 +283,6 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
         player4Comp.playerNum = 4;
     }
 
-    private void playHitAnimation(Entity bat) {
-        animationBuilder()
-                .autoReverse(true)
-                .duration(Duration.seconds(0.5))
-                .interpolator(Interpolators.BOUNCE.EASE_OUT())
-                .rotate(bat)
-                .from(FXGLMath.random(-25, 25))
-                .to(0)
-                .buildAndPlay();
-    }
-
     @Override
     public void onReceive(Connection<String> connection, String message) {
         var tokens = message.split(",");
@@ -305,7 +290,6 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
             PlayerComponent playerEntity = null;
             var stopPlayer = key.substring(0, 1).equals(("W")) || key.substring(0,1).equals("S")
                     || key.substring(0,1).equals("A") || key.substring(0,1).equals("D");
-            System.out.println(key.startsWith("W"));
 
             if (connection.getConnectionNum() == 1) {
                 playerEntity = player1Comp;
@@ -357,11 +341,9 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
                     playerEntity.placeBomb();
                     System.out.println("COMMAND TO PLACE BOMB");
                 }
-                //getInput().mockKeyPress(KeyCode.valueOf(key.substring(0, 1)));
             }
             if (key.endsWith("_UP")) {
                 currentKeyMap.put(key.substring(0,1), 0);
-                System.out.println("Are Keys Up: " + areKeysUp(currentKeyMap));
                 if(stopPlayer && !areKeysUp(currentKeyMap)){
                     playerEntity.stop();
                     System.out.println("COMMAND TO STOP");
@@ -390,11 +372,6 @@ public class BombermanApp extends GameApplication implements MessageHandler<Stri
             {
                 connection.terminate();
                 System.out.println("Client Closed");
-            }
-
-            if(key.startsWith("CLIENT_PUBLIC_KEY") && connection.getConnectionNum() == 1)
-            {
-
             }
 
         });

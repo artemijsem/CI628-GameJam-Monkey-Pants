@@ -5,7 +5,6 @@
 void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
 
 
-
     if (cmd == "SETUP")
     {
         std::cout << "Setup information recevied" << std::endl; 
@@ -20,10 +19,7 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
         player3.h = game_data.playerSize;
         player3.w = game_data.playerSize;
         player4.h = game_data.playerSize;
-        player4.w = game_data.playerSize;
-        
-        
-
+        player4.w = game_data.playerSize;               
         
     }
 
@@ -43,13 +39,8 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
             game_data.player3Lives = stoi(args.at(10));
             game_data.player4Lives = stoi(args.at(11));
             
-          
         }
-
     }
-
-
-
 
     else if (cmd == "SPAWN_BOMB")
     {
@@ -66,6 +57,7 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     else if (cmd == "POWERUP_PICKED")
     {
         level->updateMap(stoi(args.at(0)), stoi(args.at(1)), 0);
+        Mix_PlayChannel(-1, powerUpPickUp, 0);
     }
 
     else if (cmd == "BRICK_DESTROYED")
@@ -78,8 +70,14 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
     {
         level->bombExplosion(stoi(args.at(0)), stoi(args.at(1)), stoi(args.at(2)));
         std::cout << "BOMB_EXPLODED : " << cmd << " " << args.at(0) << " " << args.at(1) << " " << args.at(2) << std::endl;
+        Mix_PlayChannel(-1, bombExplosion, 0);
         
         
+    }
+
+    else if (cmd == "PLAYER_HIT")
+    {
+        Mix_PlayChannel(-1, playerHit, 0);
     }
 
     else if (cmd == "PLAYER_LOST")
@@ -87,22 +85,47 @@ void MyGame::on_receive(std::string cmd, std::vector<std::string>& args) {
         switch (stoi(args.at(0)))
         {
         case 1:
-            playerOneAlive = false;
+            playersAlive[1] = 0;
+            alivePlayersNum--;
             break;
         case 2:
-            playerTwoAlive = false;
+            playersAlive[2] = 0;
+            alivePlayersNum--;
             break;
         case 3:
-            playerThrAlive = false;
+            playersAlive[3] = 0;
+            alivePlayersNum--;
             break;
         case 4:
-            playerForAlive = false;
+            playersAlive[4] = 0;
+            alivePlayersNum--;
             break;
         default:
             break;
         }
-    }
 
+        if (stoi(args.at(0)) == game_data.playerNum)
+        {
+            gameIsOver = true;
+            Mix_PlayChannel(-1, gameLostSound, 0);
+        }
+
+
+        for (auto it = playersAlive.begin(); it != playersAlive.end(); ++it)
+        {
+            if ((it->first == game_data.playerNum && it->second == 1) && alivePlayersNum == 1)
+            {
+                gameIsWon = true;
+                Mix_PlayChannel(-1, gameWinSound, 0);
+            }
+        }
+
+    }
+    
+    else if (cmd == "SERVER_IS_FULL")
+    {
+        disconnected = true;
+    }
     
     else {
         std::cout << "Received: " << cmd << std::endl;
@@ -132,14 +155,13 @@ void MyGame::input(SDL_Event& event) {
             break;
         case SDLK_z:
 
-            send("CLOSED");
+            gameIsWon = true;
+            break;
+        case SDLK_x:
+            gameIsOver = true;
             break;
     }
 
-    //if(event.key.keysym.sym == SDLK_w) send(event.type == SDL_KEYDOWN ? "W_DOWN" : "W_UP");
-    //if(event.key.keysym.sym == SDLK_s) send(event.type == SDL_KEYDOWN ? "S_DOWN" : "S_UP");
-    //if(event.key.keysym.sym == SDLK_a) send(event.type == SDL_KEYDOWN ? "A_DOWN" : "A_UP");
-    //if(event.key.keysym.sym == SDLK_d) send(event.type == SDL_KEYDOWN ? "D_DOWN" : "D_UP");
 
 
 }
@@ -156,46 +178,6 @@ void MyGame::update() {
 
 }
 
-void MyGame::gameOver(SDL_Renderer* renderer)
-{
-    
-    SDL_Surface* monkeyWinImage = IMG_Load("../assets/images/Monkey_Win.png");
-    SDL_Surface* pantsWinImage = IMG_Load("../assets/images/Pants_Win.png");
-    SDL_Surface* mainGameSurface = SDL_GetWindowSurface(gameWindow);
-    
-
-
-    //if (monkeyWin)
-    //{
-    //    SDL_BlitSurface(monkeyWinImage, NULL, mainGameSurface, NULL);
-    //}
-
-    //if (pantsWin)
-    //{
-    //    SDL_BlitSurface(pantsWinImage, NULL, mainGameSurface, NULL);
-    //}
-    //
-
-
-
-        
-    SDL_UpdateWindowSurface(gameWindow);
-    SDL_Delay(5000);
-    
-  /*  if (monkeyWin)
-    {
-        SDL_FreeSurface(monkeyWinImage);
-    }
-
-    if (pantsWin)
-    {
-        SDL_FreeSurface(pantsWinImage);
-    }*/
-
-    
-
-    
-}
 
 void MyGame::init(SDL_Renderer* renderer)
 {
@@ -210,37 +192,78 @@ void MyGame::init(SDL_Renderer* renderer)
     playerTwoText = TextureManager::LoadTexture("../assets/images/Player_Two.png", renderer);
     playerThreeText = TextureManager::LoadTexture("../assets/images/Player_Three.png", renderer);
     playerFourText = TextureManager::LoadTexture("../assets/images/Player_Four.png", renderer);
-    TTF_Init();
 
-    font = TTF_OpenFont("../assets/fonts/Retro_Gaming.ttf", 72);
-    smallFont = TTF_OpenFont("../assets/fonts/Retro_Gaming.ttf", 24);
+    font = TTF_OpenFont("../assets/fonts/dogicapixel.ttf", 72);
+    smallFont = TTF_OpenFont("../assets/fonts/dogicapixel.ttf", 24);
 
+    playersAlive[1] = 1;
+    playersAlive[2] = 1;
+    playersAlive[3] = 1;
+    playersAlive[4] = 1;
 
+    // Audio
+    Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 
+    music = Mix_LoadWAV("../assets/audio/BG_Music.wav");
+    bombExplosion = Mix_LoadWAV("../assets/audio/Bomb_Explosion.wav");
+    playerHit = Mix_LoadWAV("../assets/audio/Player_hit_Sound.wav");
+    powerUpPickUp = Mix_LoadWAV("../assets/audio/PickUp_Sound.wav");
+    gameWinSound = Mix_LoadWAV("../assets/audio/Player_Win_Sound.wav");
+    gameLostSound = Mix_LoadWAV("../assets/audio/Player_Lose_Sound.wav");
+
+    Mix_PlayChannel(-1, music, -1);
 
 }
 
 // Comment
 void MyGame::render(SDL_Renderer* renderer) {
 
+    if (!disconnected)
+    {
+        level->drawMap(renderer);
 
-    level->drawMap(renderer);
+        if(playersAlive[1] == 1) TextureManager::Draw(renderer, playerOneText, getPlayerOneRect());
+        if(playersAlive[2] == 1) TextureManager::Draw(renderer, playerTwoText, getPlayerTwoRect());
+        if(playersAlive[3] == 1) TextureManager::Draw(renderer, playerThreeText, getPlayerThreeRect());
+        if(playersAlive[4] == 1) TextureManager::Draw(renderer, playerFourText, getPlayerFourRect());
 
-    if(playerOneAlive) TextureManager::Draw(renderer, playerOneText, getPlayerOneRect());
-    if(playerTwoAlive) TextureManager::Draw(renderer, playerTwoText, getPlayerTwoRect());
-    if(playerThrAlive) TextureManager::Draw(renderer, playerThreeText, getPlayerThreeRect());
-    if(playerForAlive) TextureManager::Draw(renderer, playerFourText, getPlayerFourRect());
-
-
-    level->clearBombExplosion();
+        level->clearBombExplosion();
     
-    
-    drawUI(renderer);
+        drawUI(renderer);
+    }
+    else
+    {
+        textSurface = TTF_RenderText_Solid(font, "Server is full!", textColor);
+        textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+        textRect = { 10, 200, textW, textH };
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
 
-    
-    //if (monkeyWin) { gameOver(renderer); }
-    //if (pantsWin) { gameOver(renderer); }
-    /*DrawCircle(renderer, game_data.ballX, game_data.ballY, 5);*/
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+
+        textSurface = TTF_RenderText_Solid(smallFont, "Sadly, we were unable to connect you", textColor);
+        textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+        textRect = { 70, 290, textW, textH };
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+
+        textSurface = TTF_RenderText_Solid(smallFont, "to the server as it was full", textColor);
+        textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+        textRect = { 150, 330, textW, textH };
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+    }
+
+
+
+
 }
 
 void MyGame::drawUI(SDL_Renderer* renderer) {
@@ -332,22 +355,64 @@ void MyGame::drawUI(SDL_Renderer* renderer) {
 
     SDL_FreeSurface(textSurface);
     SDL_DestroyTexture(textTexture);
+ 
 
-    ////std::cout << "Drawing UI" << std::endl; 
-    //textSurface = TTF_RenderText_Solid(font, std::to_string(game_data.gameTime).c_str(), textColor);
-    //textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    //SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH); 
-    //textRect = { 675, 100, textW, textH };
-    //SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+    if (gameIsOver)
+    {
+        textSurface = TTF_RenderText_Solid(font, "You have died!", textColor);
+        textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+        textRect = { 20, 200, textW, textH };
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
 
-    //SDL_FreeSurface(textSurface); 
-    //SDL_DestroyTexture(textTexture); 
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+
+        textSurface = TTF_RenderText_Solid(smallFont, "You can spectate other players or leave", textColor);
+        textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+        textRect = { 30, 290, textW, textH };
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+    }
+
+    if (gameIsWon)
+    {
+        textSurface = TTF_RenderText_Solid(font, "You have won!", textColor);
+        textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+        textRect = { 40, 200, textW, textH };
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+
+        textSurface = TTF_RenderText_Solid(smallFont, "Congratulations!", textColor);
+        textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_QueryTexture(textTexture, NULL, NULL, &textW, &textH);
+        textRect = { 260, 290, textW, textH };
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
+    }
+
 }
 
 void MyGame::quitGame() {
     TTF_CloseFont(font); 
     TTF_CloseFont(smallFont); 
     TTF_Quit();
+
+    Mix_FreeChunk(playerHit);
+    Mix_FreeChunk(powerUpPickUp);
+    Mix_FreeChunk(gameLostSound);
+    Mix_FreeChunk(gameWinSound);
+    Mix_FreeChunk(bombExplosion);
+    Mix_FreeChunk(music);
+    Mix_CloseAudio();
     
 }
 
